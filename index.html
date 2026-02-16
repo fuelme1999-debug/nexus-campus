@@ -143,6 +143,617 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+
+        /* AI Chat Bot Styles */
+        .chat-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), #10b981);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(29, 185, 84, 0.4);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .chat-fab:hover {
+            transform: scale(1.15);
+            box-shadow: 0 12px 48px rgba(29, 185, 84, 0.6);
+        }
+
+        .chat-fab.active {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .chat-container {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 420px;
+            height: 600px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            z-index: 999;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            transform: translateY(20px);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .chat-container.active {
+            transform: translateY(0);
+            pointer-events: auto;
+            opacity: 1;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .chat-header .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            hover: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .chat-header .close-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.bot .message-avatar {
+            background: var(--primary);
+        }
+
+        .message-content {
+            max-width: 300px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+        }
+
+        .message.bot .message-content {
+            background: rgba(29, 185, 84, 0.15);
+            border: 1px solid rgba(29, 185, 84, 0.3);
+            color: white;
+        }
+
+        .message.user .message-content {
+            background: var(--primary);
+            color: black;
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 8px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 10px 14px;
+            border-radius: 24px;
+            color: white;
+            outline: none;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.12);
+        }
+
+        .chat-input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+
+        .send-btn {
+            background: var(--primary);
+            border: none;
+            color: black;
+            padding: 10px 16px;
+            border-radius: 24px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+
+        .send-btn:hover {
+            background: #16a34a;
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        @media (max-width: 640px) {
+            .chat-container {
+                width: calc(100vw - 40px);
+                height: 500px;
+                right: 20px;
+                bottom: 90px;
+            }
+        }
+
+        /* Community Forum Styles */
+        .forum-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .forum-tab {
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .forum-tab:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .forum-tab.active {
+            background: var(--primary);
+            color: black;
+            border-color: var(--primary);
+        }
+
+        .discussion-card {
+            glass-panel p-4 border border-white/10 hover:bg-white/5 transition cursor-pointer rounded-lg mb-3;
+            border-left: 4px solid var(--primary);
+        }
+
+        .post-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .post-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(29, 185, 84, 0.3);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: black;
+        }
+
+        .post-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .post-author {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .post-time {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .post-content {
+            margin: 12px 0;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .post-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .post-action-btn {
+            flex: 1;
+            padding: 8px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .post-action-btn:hover {
+            background: rgba(29, 185, 84, 0.2);
+            color: var(--primary);
+        }
+
+        .news-item {
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            transition: all 0.2s;
+        }
+
+        .news-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(4px);
+        }
+
+        .news-date {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .news-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+        }
+
+        .news-excerpt {
+            font-size: 13px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        .blog-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(29, 185, 84, 0.3);
+        }
+
+        .blog-header {
+            background: linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(16, 185, 129, 0.2));
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+
+        .blog-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .blog-author {
+            font-size: 12px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .blog-tag {
+            display: inline-block;
+            background: rgba(29, 185, 84, 0.15);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .blog-body {
+            padding: 16px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .creative-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .creative-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .creative-card:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            background: rgba(29, 185, 84, 0.1);
+        }
+
+        .creative-thumbnail {
+            width: 100%;
+            height: 140px;
+            background: linear-gradient(135deg, rgba(29, 185, 84, 0.2), rgba(16, 185, 129, 0.2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+        }
+
+        .creative-info {
+            padding: 12px;
+        }
+
+        .creative-title {
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .creative-user {
+            font-size: 11px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .creative-likes {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 1.5rem;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            color: #aaa;
+        }
+
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.12);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(29, 185, 84, 0.15);
+            color: var(--primary);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .badge.hot {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        .badge.trending {
+            background: rgba(249, 115, 22, 0.15);
+            color: #f97316;
+        }
     </style>
 </head>
 <body>
@@ -152,6 +763,34 @@
         <div class="intro-aura"></div>
         <h1 class="intro-logo">NEXUS</h1>
         <p class="intro-sub">CAMPUS OS</p>
+    </div>
+
+    <!-- AI CHAT BOT -->
+    <button class="chat-fab" onclick="toggleChat()" id="chatFab" title="Ask AI Assistant">
+        <i class="fa-solid fa-message"></i>
+    </button>
+
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <div>
+                <h3>🤖 NEXUS AI</h3>
+                <p style="font-size: 11px; margin: 4px 0 0 0; color: #888;">Smart Campus Assistant</p>
+            </div>
+            <button class="close-btn" onclick="toggleChat()">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot" id="welcomeMsg">
+                <div class="message-avatar">🤖</div>
+                <div>
+                    <div class="message-content">Hi! I'm your NEXUS AI Assistant. How can I help you today?</div>
+                    <div class="message-time" id="welcomeTime"></div>
+                </div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask me anything..." onkeypress="handleChatKeyPress(event)">
+            <button class="send-btn" onclick="sendChatMessage()">Send</button>
+        </div>
     </div>
 
     <!-- MAIN APP -->
@@ -206,36 +845,110 @@
                 'Mid-Term 1': {
                     'Data Structures': 85,
                     'Algorithms': 90,
-                    'DBMS': 88
+                    'DBMS': 88,
+                    'Web Development': 92,
+                    'Cloud Computing': 87
+                },
+                'Mid-Term 2': {
+                    'Data Structures': 88,
+                    'Algorithms': 92,
+                    'DBMS': 90
                 }
             },
             'mess/menu': {
-                breakfast: 'Aloo Paratha',
-                lunch: 'Rajma Chawal',
-                dinner: 'Paneer Butter Masala'
+                breakfast: 'Aloo Paratha with Butter',
+                lunch: 'Rajma Chawal with Pickle',
+                dinner: 'Paneer Butter Masala with Naan',
+                snacks: 'Samosa & Chai'
             },
             'transport/shuttles': [
-                {name: 'Campus Loop A', status: 'Arriving Main Gate', color: 'blue'},
-                {name: 'City Connector', status: 'Delayed (10m)', color: 'yellow'}
+                {name: 'Campus Loop A', status: '2 mins away', color: 'blue', capacity: '45/50'},
+                {name: 'City Connector', status: 'Arriving', color: 'yellow', capacity: '12/50'},
+                {name: 'Eco Shuttle', status: '8 mins away', color: 'green', capacity: '38/45'}
             ],
             'campus/sustainability': {
                 solar: 840,
-                wind: 320
+                wind: 320,
+                water_saved: 1250,
+                co2_reduced: 450
             },
             'clubs/list': [
-                {name: 'GDSC', color: 'blue'},
-                {name: 'E-Cell', color: 'orange'},
-                {name: 'Lit Soc', color: 'pink'}
+                {name: 'GDSC', color: 'blue', members: 450, description: 'Google Developer Club'},
+                {name: 'E-Cell', color: 'orange', members: 320, description: 'Entrepreneurship Cell'},
+                {name: 'Lit Soc', color: 'pink', members: 210, description: 'Literary Society'},
+                {name: 'Tech Geeks', color: 'purple', members: 380, description: 'Technology Innovation'},
+                {name: 'Sports', color: 'red', members: 500, description: 'Sports & Fitness'},
+                {name: 'Arts', color: 'cyan', members: 290, description: 'Creative Arts Club'}
             ],
             'mess/dashboard': {
                 mealsServed: 450,
-                feedback: 4.5
+                feedback: 4.5,
+                todayMeals: 385,
+                peakHour: '12:30 PM'
             },
             'mess/inventory': {
                 rice: 20,
                 flour: 45,
-                oil: 80
-            }
+                oil: 80,
+                vegetables: 60,
+                dairy: 35,
+                spices: 75
+            },
+            'announcements': [
+                {title: 'Fest 2026 Registration Open', date: 'Today', icon: '🎉', color: 'yellow'},
+                {title: 'Wi-Fi Upgrade Complete', date: 'Yesterday', icon: '📡', color: 'blue'},
+                {title: 'Library Extended Hours', date: '2 days ago', icon: '📚', color: 'purple'}
+            ],
+            'perks': [
+                {icon: '🍔', title: 'Canteen Discount', discount: '20% OFF', brands: 'Campus Canteen & Food Court'},
+                {icon: '🛍️', title: 'Shopping Deal', discount: '15% OFF', brands: 'Local Retail Partners'},
+                {icon: '📚', title: 'Bookstore Offer', discount: '25% OFF', brands: 'Campus Bookstore'},
+                {icon: '💪', title: 'Gym Membership', discount: '30% OFF', brands: 'Fitness Center'},
+                {icon: '✈️', title: 'Travel Discount', discount: '10% OFF', brands: 'Travel & Tours'},
+                {icon: '🎬', title: 'Movie Tickets', discount: '40% OFF', brands: 'PVR & SRS Cinema'}
+            ],
+            'forums/discussions': {
+                'class': [
+                    {id: 1, author: 'Priya Singh', avatar: 'P', time: '2h ago', title: 'Data Structures Assignment Help', content: 'Anyone solved the graph traversal problem? Getting confused with DFS implementation.', replies: 12, likes: 24, category: 'Class'},
+                    {id: 2, author: 'Raj Kumar', avatar: 'R', time: '4h ago', title: 'Upcoming exam preparation', content: 'Let\'s create a study group for the upcoming midterm. Anyone interested?', replies: 8, likes: 15, category: 'Class'},
+                ],
+                'branch': [
+                    {id: 3, author: 'Isha Patel', avatar: 'I', time: '1h ago', title: 'CSE Internship Opportunities', content: 'Do anyone have info about summer internships? Preferably startups.', replies: 20, likes: 45, category: 'Branch'},
+                    {id: 4, author: 'Arjun Roy', avatar: 'A', time: '3h ago', title: 'ECE Lab Projects', content: 'Circuit design tips for our final project submission?', replies: 5, likes: 10, category: 'Branch'},
+                ],
+                'university': [
+                    {id: 5, author: 'Admin', avatar: '🎓', time: '5h ago', title: 'New Library Hours', content: 'Library extended hours: Now open until 12 AM on weekdays. More resources available!', replies: 32, likes: 89, category: 'University'},
+                    {id: 6, author: 'Events Team', avatar: '🎉', time: '8h ago', title: 'Tech Fest 2026 Registration Open', content: '🚀 Tech Fest 2026 is coming! Register your teams now. Exciting prizes and opportunities!', replies: 45, likes: 120, category: 'University'},
+                ],
+                'global': [
+                    {id: 7, author: 'Tech Enthusiast', avatar: 'T', time: '12h ago', title: 'Latest AI Breakthroughs', content: 'What do you think about the new GPT developments? How will it impact our careers?', replies: 89, likes: 234, category: 'Global'},
+                    {id: 8, author: 'Dev Leader', avatar: 'D', time: '1d ago', title: 'Best Programming Languages 2026', content: 'Rust vs Go vs Python - what\'s your favorite? Let\'s discuss!', replies: 156, likes: 412, category: 'Global'},
+                ]
+            },
+            'news': [
+                {id: 1, date: 'Feb 16, 2026', icon: '🏆', title: 'Our University Ranks Top 50 in National Rankings', excerpt: 'Proud to announce our university has been ranked among the top 50 educational institutions in the country!'},
+                {id: 2, date: 'Feb 15, 2026', icon: '🎓', title: 'New Scholarship Program Launched', excerpt: 'Merit and need-based scholarships available for deserving students. Apply now!'},
+                {id: 3, date: 'Feb 14, 2026', icon: '🚀', title: 'Research Lab Receives Funding Grant', excerpt: 'Our AI Research Lab secured Rs 50 lakh funding for groundbreaking projects.'},
+                {id: 4, date: 'Feb 13, 2026', icon: '🌍', title: 'International Student Exchange Program', excerpt: 'Partnership with 5 European universities for semester exchange. Limited spots available!'},
+                {id: 5, date: 'Feb 12, 2026', icon: '💼', title: 'Record Placements This Year', excerpt: 'Over 500 students placed with an average package of Rs 12 LPA. Congratulations!'}
+            ],
+            'blogs': [
+                {id: 1, author: 'Akshay Singh', date: 'Feb 16', title: 'My Journey to Creating an AI App', content: 'Started learning AI 6 months ago, and today I launched my first AI-powered mobile app. Here\'s what I learned...', tag: 'Technical', likes: 145},
+                {id: 2, author: 'Deepika Sharma', date: 'Feb 15', title: 'Balancing College and Side Projects', content: 'Finding it tough to manage coursework AND maintain a personal project? Here are my 5 strategies that worked...', tag: 'Life', likes: 234},
+                {id: 3, author: 'Rohan Verma', date: 'Feb 14', title: 'Web Development Fundamentals Explained', content: 'A complete guide to HTML, CSS, and JavaScript for beginners. Includes real-world examples...', tag: 'Tutorial', likes: 567},
+                {id: 4, author: 'Zara Khan', date: 'Feb 13', title: 'Entrepreneurship: From Idea to Launch', content: 'How I validated my startup idea, got funding, and launched within 3 months...', tag: 'Startup', likes: 189},
+                {id: 5, author: 'Nikhil Gupta', date: 'Feb 12', title: 'Open Source Contribution Guide', content: 'Everything you need to know to start contributing to open-source projects...', tag: 'Community', likes: 312}
+            ],
+            'creative': [
+                {id: 1, creator: 'DJ Maya', type: '🎵', title: 'Campus Anthem 2026', likes: 2400, category: 'Music'},
+                {id: 2, creator: 'Aditya Films', type: '🎬', title: 'Campus Life - Short Film', likes: 1850, category: 'Video'},
+                {id: 3, creator: 'Sophia Art', type: '🎨', title: 'Digital Illustration Series', likes: 1520, category: 'Art'},
+                {id: 4, creator: 'Ved Photography', type: '📸', title: 'Golden Hour Campus Shots', likes: 3200, category: 'Photography'},
+                {id: 5, creator: 'Rhythm Studio', type: '🎵', title: 'Indie Music Collection', likes: 980, category: 'Music'},
+                {id: 6, creator: 'Creative minds', type: '🎬', title: 'Behind the Scenes: Tech Fest', likes: 1670, category: 'Video'},
+                {id: 7, creator: 'Sketch Club', type: '✏️', title: 'Animation Project - 3D Design', likes: 2100, category: 'Animation'},
+                {id: 8, creator: 'Lyric Writer', type: '📝', title: 'Original Poetry Collection', likes: 890, category: 'Literature'}
+            ]
         };
 
         console.log("✅ Local Storage Initialized!");
@@ -244,8 +957,261 @@
         let currentRole = 'student';
         let currentView = 'dashboard';
 
+        // ==================== SOUND EFFECTS ====================
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
         function playSound(type) {
-            // Placeholder for sound effects
+            try {
+                const now = audioContext.currentTime;
+                
+                if (type === 'whoosh') {
+                    // Whoosh sound for transitions
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(150, now);
+                    osc.frequency.exponentialRampToValueAtTime(50, now + 0.3);
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'click') {
+                    // Click sound for buttons
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(400, now);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'success') {
+                    // Success sound - two beeps
+                    const osc1 = audioContext.createOscillator();
+                    const osc2 = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc1.connect(gain);
+                    osc2.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    // First beep
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(600, now);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc1.start(now);
+                    osc1.stop(now + 0.15);
+                    
+                    // Second beep
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(800, now + 0.2);
+                    osc2.start(now + 0.2);
+                    osc2.stop(now + 0.35);
+                } else if (type === 'notification') {
+                    // Notification sound
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(500, now);
+                    osc.frequency.exponentialRampToValueAtTime(700, now + 0.1);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                    osc.start(now);
+                    osc.stop(now + 0.2);
+                }
+            } catch (e) {
+                console.log('Audio not supported or blocked');
+            }
+        }
+
+        // ==================== AI CHAT BOT ====================
+        const aiKnowledgeBase = {
+            student: {
+                'attendance': 'Check your attendance on the Attendance page. You need to maintain 75% attendance to be eligible for exams. Visit the Attendance view to see your current status.',
+                'marks': 'Your marks are available in the Academics section. Click on Academics in the sidebar to view your scores for each subject and exam term.',
+                'mess menu': 'The Mess Menu shows daily breakfast, lunch, dinner, and snack options with timings. You can rate meals as good or bad to help improve quality.',
+                'clubs': 'Join clubs to connect with like-minded students! Visit the Clubs section to explore 6 different clubs and manage your memberships.',
+                'transport': 'Check shuttle timings and capacity on the Transport page. See real-time shuttle locations on the map and get notifications when your shuttle arrives.',
+                'academic': 'Your CGPA and exam scores are in the Academics section. Review your performance and work with your professor if needed.',
+                'perks': 'Check Student Perks & Offers for exclusive discounts. Claim offers to avail benefits!',
+                'sustainability': 'Learn about campus sustainability including solar power, wind energy, water conservation, and CO₂ reduction efforts.',
+                'report': 'Use the Report section to file anti-ragging complaints or report waste/hazards. Your report will be reviewed by campus authorities.',
+                'community': 'Campus Buff is our student community! Discuss with classmates, your branch, university-wide topics, or chat globally. Click + Start Discussion to join conversations.',
+                'campus buff': 'Join discussions in 4 categories: My Class (study help), My Branch (internships & projects), University (campus announcements), or Global (tech & trends).',
+                'news': 'Check the News section for latest campus updates: scholarships, placements, research funding, and university achievements.',
+                'blogs': 'Read & write blogs! Share your knowledge about tech, life balance, tutorials, startups, and more. Click + Write Blog to publish.',
+                'creative showcase': 'Show your talent! Share music, videos, art, photography, animations, and literature. Browse other students\' amazing creations.',
+                'default': 'I can help with attendance, marks, clubs, mess menu, transport, perks, sustainability, reporting, community discussions, news, blogs, and creative showcase. What would you like to know?'
+            },
+            teacher: {
+                'attendance': 'Mark attendance in the Attendance section. Select present or absent for each student, then save. Records are stored in the system.',
+                'marks': 'Upload marks in Upload Marks section. Enter subject code, student roll number, and marks obtained.',
+                'notices': 'Post notices in the Notices section to broadcast information to all students about class schedules and exam updates.',
+                'class': 'Manage your class info and student enrollments through the Dashboard. See your next scheduled lecture details.',
+                'student performance': 'Review student performance through the marks system. Compare scores across exams to identify improvement areas.',
+                'default': 'I can help with attendance marking, uploading marks, posting notices, and managing classes. What do you need?'
+            },
+            mess: {
+                'inventory': 'Check inventory levels in the Inventory section. Items below 30% stock are marked low and need restocking.',
+                'menu': 'Update the daily menu in the Menu section. Changes are visible to all students immediately.',
+                'restock': 'Click Order Restock when inventory is low. Items will be replenished automatically.',
+                'dashboard': 'The Mess Dashboard shows meals served, customer feedback, inventory status, and peak serving hours.',
+                'feedback': 'Monitor student meal feedback. Low scores indicate need to improve meal quality or variety.',
+                'default': 'I can help with inventory, menu updates, restock orders, and feedback monitoring. How can I assist?'
+            }
+        };
+
+        let chatHistory = [];
+
+        function toggleChat() {
+            const chatContainer = document.getElementById('chatContainer');
+            const chatFab = document.getElementById('chatFab');
+            chatContainer.classList.toggle('active');
+            chatFab.classList.toggle('active');
+            
+            if (chatContainer.classList.contains('active')) {
+                playSound('click');
+                document.getElementById('chatInput').focus();
+                localStorage.setItem('chatOpen', 'true');
+            } else {
+                localStorage.setItem('chatOpen', 'false');
+            }
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        }
+
+        function addMessageToChat(message, isUser = false) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const time = formatTime(new Date());
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${isUser ? '👤' : '🤖'}</div>
+                <div>
+                    <div class="message-content">${message}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div>
+                    <div class="message-content">
+                        <div class="typing-indicator">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typingDiv = document.getElementById('typingIndicator');
+            if (typingDiv) typingDiv.remove();
+        }
+
+        function generateAIResponse(userMessage) {
+            const role = currentRole || 'student';
+            const knowledge = aiKnowledgeBase[role] || {};
+            
+            const lowerMessage = userMessage.toLowerCase();
+            let response = knowledge['default'] || 'How can I help you?';
+            
+            for (const [key, value] of Object.entries(knowledge)) {
+                if (key !== 'default' && lowerMessage.includes(key)) {
+                    response = value;
+                    break;
+                }
+            }
+            
+            if (response === knowledge['default']) {
+                const roleResponses = {
+                    student: 'I can assist with attendance, academics, mess menu, clubs, transport, sustainability, and reporting. What would you like to know?',
+                    teacher: 'I can help with attendance, marks, notices, and class management. What do you need?',
+                    mess: 'I can help with inventory, menu updates, restocking, and feedback monitoring. How can I assist?'
+                };
+                response = roleResponses[role] || knowledge['default'];
+            }
+            
+            return response;
+        }
+
+        function sendChatMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            
+            if (!message) return;
+            
+            addMessageToChat(message, true);
+            playSound('click');
+            chatInput.value = '';
+            
+            chatHistory.push({ role: 'user', message: message, time: new Date() });
+            
+            showTypingIndicator();
+            
+            setTimeout(() => {
+                removeTypingIndicator();
+                const aiResponse = generateAIResponse(message);
+                addMessageToChat(aiResponse, false);
+                playSound('notification');
+                
+                chatHistory.push({ role: 'bot', message: aiResponse, time: new Date() });
+                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            }, 500 + Math.random() * 500);
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function loadChatHistory() {
+            try {
+                const saved = localStorage.getItem('chatHistory');
+                if (saved) {
+                    chatHistory = JSON.parse(saved);
+                }
+                
+                if (localStorage.getItem('chatOpen') === 'true') {
+                    const chatContainer = document.getElementById('chatContainer');
+                    chatContainer.classList.add('active');
+                    document.getElementById('chatFab').classList.add('active');
+                }
+            } catch (e) {
+                console.log('Error loading chat history');
+            }
+        }
+
+        function setWelcomeMessageTime() {
+            const now = formatTime(new Date());
+            const welcomeTime = document.getElementById('welcomeTime');
+            if (welcomeTime) welcomeTime.textContent = now;
         }
 
         function setViewTitle(title) {
@@ -253,8 +1219,8 @@
         }
 
         function triggerAction(msg) {
-            alert(msg);
             playSound('success');
+            alert(msg);
         }
 
         // ==================== LOCAL STORAGE HELPERS ====================
@@ -317,6 +1283,12 @@
 
         // ==================== INTRO ANIMATION ====================
         window.addEventListener('load', () => {
+            setWelcomeMessageTime();
+            loadChatHistory();
+            playSound('whoosh');
+            setTimeout(() => {
+                playSound('success');
+            }, 2000);
             setTimeout(() => {
                 document.getElementById('intro-layer').style.opacity = '0';
                 document.getElementById('intro-layer').style.visibility = 'hidden';
@@ -340,7 +1312,11 @@
                     {icon: 'fa-leaf', label: 'Sustainability', view: 'sustainability'},
                     {icon: 'fa-users', label: 'Clubs', view: 'clubs'},
                     {icon: 'fa-gift', label: 'Perks', view: 'perks'},
-                    {icon: 'fa-flag', label: 'Report', view: 'report'}
+                    {icon: 'fa-flag', label: 'Report', view: 'report'},
+                    {icon: 'fa-comments', label: 'Campus Buff', view: 'community'},
+                    {icon: 'fa-newspaper', label: 'News', view: 'news'},
+                    {icon: 'fa-blog', label: 'Blogs', view: 'blogs'},
+                    {icon: 'fa-star', label: 'Showcase', view: 'creative'}
                 ],
                 teacher: [
                     {icon: 'fa-home', label: 'Dashboard', view: 'dashboard'},
@@ -368,6 +1344,7 @@
         }
 
         function navigate(view) {
+            playSound('click');
             currentView = view;
             document.querySelectorAll('.nav-item').forEach(item => {
                 item.classList.remove('active');
@@ -431,19 +1408,8 @@
                 setViewTitle('Clubs');
                 loadClubsData();
             } else if (view === 'perks') {
-                setViewTitle('Perks');
-                c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in">
-                    <a href="#" class="glass-panel p-6 text-center hover:bg-white/5 border-t-4 border-green-500">
-                        <div class="text-4xl mb-4">🛍️</div>
-                        <h3 class="font-bold">UNiDAYS</h3>
-                        <p class="text-xs text-gray-400 mt-2">Discounts on Apple & Nike</p>
-                    </a>
-                    <a href="#" class="glass-panel p-6 text-center hover:bg-white/5 border-t-4 border-blue-500">
-                        <div class="text-4xl mb-4">🎓</div>
-                        <h3 class="font-bold">Coursera</h3>
-                        <p class="text-xs text-gray-400 mt-2">Free Courses</p>
-                    </a>
-                </div>`;
+                setViewTitle('Student Perks & Offers');
+                loadPerksData();
             } else if (view === 'report') {
                 setViewTitle('Report Issue');
                 c.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-in">
@@ -462,7 +1428,243 @@
                         </button>
                     </div>
                 </div>`;
+            } else if (view === 'community') {
+                setViewTitle('Campus Buff - Student Community');
+                loadCommunityForum();
+            } else if (view === 'news') {
+                setViewTitle('Campus News & Updates');
+                loadNewsSection();
+            } else if (view === 'blogs') {
+                setViewTitle('Student Blogs & Articles');
+                loadBlogsSection();
+            } else if (view === 'creative') {
+                setViewTitle('Creative Showcase');
+                loadCreativeShowcase();
             }
+        }
+
+        // Load Community Forum
+        async function loadCommunityForum() {
+            const c = document.getElementById('contentArea');
+            c.innerHTML = `<div class="fade-in">
+                <div class="glass-panel p-6 mb-6 border-l-4 border-blue-500">
+                    <p class="text-sm mb-4">💬 Connect with students across your class, branch, university & globally!</p>
+                    <button onclick="openPostModal('community')" class="w-full bg-blue-500 text-white font-bold py-2 rounded-lg text-sm">+ Start Discussion</button>
+                </div>
+                
+                <div class="forum-tabs" id="forumTabs">
+                    <div class="forum-tab active" onclick="switchForumCategory('class')">👥 My Class</div>
+                    <div class="forum-tab" onclick="switchForumCategory('branch')">🏢 My Branch</div>
+                    <div class="forum-tab" onclick="switchForumCategory('university')">🎓 University</div>
+                    <div class="forum-tab" onclick="switchForumCategory('global')">🌍 Global</div>
+                </div>
+                
+                <div id="forumContent"></div>
+            </div>`;
+            
+            switchForumCategory('class');
+        }
+
+        function switchForumCategory(category) {
+            const tabs = document.querySelectorAll('.forum-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            event?.target?.classList.add('active');
+            
+            const content = document.getElementById('forumContent');
+            const data = mockData['forums/discussions'][category] || [];
+            
+            content.innerHTML = data.map(post => `
+                <div class="post-card">
+                    <div class="post-header">
+                        <div class="post-avatar">${post.avatar}</div>
+                        <div class="post-meta">
+                            <div class="post-author">${post.author}</div>
+                            <div class="post-time">${post.time}</div>
+                        </div>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">${post.title}</h4>
+                    <div class="post-content">${post.content}</div>
+                    <div class="post-actions">
+                        <div class="post-action-btn">💬 ${post.replies} Replies</div>
+                        <div class="post-action-btn">👍 ${post.likes} Likes</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Load News Section
+        async function loadNewsSection() {
+            const c = document.getElementById('contentArea');
+            const news = mockData['news'] || [];
+            
+            c.innerHTML = `<div class="space-y-4 fade-in">
+                <div class="glass-panel p-4 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/20">
+                    <p class="text-sm">📰 Stay updated with latest campus & university news</p>
+                </div>
+                
+                ${news.map(item => `
+                    <div class="news-item hover:bg-white/10 transition cursor-pointer" onclick="openNewsDetail(${item.id})">
+                        <div class="flex items-start gap-3">
+                            <span class="text-3xl">${item.icon}</span>
+                            <div class="flex-1">
+                                <div class="news-date">${item.date}</div>
+                                <div class="news-title">${item.title}</div>
+                                <div class="news-excerpt">${item.excerpt}</div>
+                                <button onclick="event.stopPropagation()" class="mt-3 text-xs text-blue-400 hover:text-blue-300">Read More →</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
+        // Load Blogs Section
+        async function loadBlogsSection() {
+            const c = document.getElementById('contentArea');
+            const blogs = mockData['blogs'] || [];
+            
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="glass-panel p-6 border-l-4 border-purple-500">
+                    <p class="text-sm mb-4">✍️ Share your knowledge & experiences!</p>
+                    <button onclick="openPostModal('blog')" class="w-full bg-purple-500 text-white font-bold py-2 rounded-lg text-sm">+ Write Blog</button>
+                </div>
+                
+                <div class="space-y-4">
+                    ${blogs.map(blog => `
+                        <div class="blog-card cursor-pointer transition hover:shadow-lg" onclick="openBlogDetail(${blog.id})">
+                            <div class="blog-header">
+                                <div>
+                                    <div class="blog-title">${blog.title}</div>
+                                    <div class="blog-author">✍️ ${blog.author} • ${blog.date}</div>
+                                    <div class="blog-tag">${blog.tag}</div>
+                                </div>
+                                <div class="text-2xl">📖</div>
+                            </div>
+                            <div class="blog-body line-clamp-3">${blog.content}</div>
+                            <div style="padding: 0 16px 12px; display: flex; justify-content: space-between; font-size: 12px; color: #888;">
+                                <span>👍 ${blog.likes} Likes</span>
+                                <span>Read More →</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        // Load Creative Showcase
+        async function loadCreativeShowcase() {
+            const c = document.getElementById('contentArea');
+            const creative = mockData['creative'] || [];
+            
+            c.innerHTML = `<div class="fade-in">
+                <div class="glass-panel p-6 mb-6 border-l-4 border-pink-500">
+                    <p class="text-sm mb-4">🎨 Showcase your talent - Music, Videos, Art, Photography & More!</p>
+                    <button onclick="openPostModal('creative')" class="w-full bg-pink-500 text-white font-bold py-2 rounded-lg text-sm">+ Share Creation</button>
+                </div>
+                
+                <div class="creative-grid">
+                    ${creative.map(item => `
+                        <div class="creative-card cursor-pointer" onclick="openCreativeDetail(${item.id})">
+                            <div class="creative-thumbnail">${item.type}</div>
+                            <div class="creative-info">
+                                <div class="creative-title">${item.title}</div>
+                                <div class="creative-user">
+                                    <span>👤</span>
+                                    <span>${item.creator}</span>
+                                </div>
+                                <div class="creative-likes">❤️ ${item.likes}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        // Modal Functions
+        function openPostModal(type) {
+            playSound('click');
+            const overlay = document.getElementById('postModal') || createModal();
+            const title = type === 'blog' ? 'Write a Blog' : type === 'creative' ? 'Share Your Creation' : 'Start a Discussion';
+            const placeholder = type === 'blog' ? 'Share your knowledge...' : type === 'creative' ? 'Describe your creation...' : 'What\'s on your mind?';
+            
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span>${title}</span>
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="glass-input" id="postTitle" placeholder="Enter title...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Content</label>
+                        <textarea class="form-textarea" id="postContent" placeholder="${placeholder}"></textarea>
+                    </div>
+                    ${type === 'blog' ? `<div class="form-group">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="glass-input" id="postCategory" placeholder="e.g., Technical, Life, Tutorial">
+                    </div>` : ''}
+                    ${type === 'creative' ? `<div class="form-group">
+                        <label class="form-label">Type</label>
+                        <select class="glass-input" id="creativeType">
+                            <option>🎵 Music</option>
+                            <option>🎬 Video</option>
+                            <option>🎨 Art</option>
+                            <option>📸 Photography</option>
+                            <option>✏️ Animation</option>
+                            <option>📝 Literature</option>
+                        </select>
+                    </div>` : ''}
+                    <button onclick="submitNewPost('${type}')" class="w-full bg-green-500 text-black font-bold py-3 rounded-lg">Post Now</button>
+                </div>
+            `;
+            overlay.classList.add('active');
+        }
+
+        function submitNewPost(type) {
+            playSound('success');
+            const title = document.getElementById('postTitle').value;
+            const content = document.getElementById('postContent').value;
+            
+            if (!title.trim() || !content.trim()) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            triggerAction(`${type === 'blog' ? 'Blog' : type === 'creative' ? 'Creation' : 'Discussion'} posted successfully! 🎉`);
+            closeModal();
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('postModal');
+            if (overlay) overlay.classList.remove('active');
+        }
+
+        function createModal() {
+            const overlay = document.createElement('div');
+            overlay.id = 'postModal';
+            overlay.className = 'modal-overlay';
+            overlay.onclick = (e) => {
+                if (e.target === overlay) closeModal();
+            };
+            document.body.appendChild(overlay);
+            return overlay;
+        }
+
+        function openNewsDetail(id) {
+            playSound('click');
+            triggerAction('Opening full news article...');
+        }
+
+        function openBlogDetail(id) {
+            playSound('click');
+            triggerAction('Opening full blog post...');
+        }
+
+        function openCreativeDetail(id) {
+            playSound('click');
+            triggerAction('Opening creative content...');
         }
 
         // Load Dashboard Data from Firebase
@@ -476,22 +1678,85 @@
                 upcomingClass: 'Data Structures',
                 classTime: '10:00 AM'
             };
+            const announcements = mockData['announcements'] || [];
 
-            c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
-                <div class="glass-panel p-6 border-l-4 border-green-500">
-                    <h3 class="text-lg font-bold">Attendance</h3>
-                    <p class="text-4xl font-black mt-2">${data.attendance}%</p>
-                    <p class="text-sm text-gray-400">Current Semester</p>
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-panel p-6 border-l-4 border-green-500 hover:bg-white/10 transition cursor-pointer" onclick="navigate('attendance')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Attendance</h3>
+                                <p class="text-4xl font-black mt-2">${data.attendance}%</p>
+                            </div>
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <p class="text-xs text-green-400 mt-3">✓ On Track</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-blue-500 hover:bg-white/10 transition cursor-pointer" onclick="navigate('academics')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">CGPA</h3>
+                                <p class="text-4xl font-black mt-2">${data.cgpa}</p>
+                            </div>
+                            <span class="text-2xl">🎓</span>
+                        </div>
+                        <p class="text-xs text-blue-400 mt-3">Excellent</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-purple-500 hover:bg-white/10 transition cursor-pointer">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Courses</h3>
+                                <p class="text-4xl font-black mt-2">5</p>
+                            </div>
+                            <span class="text-2xl">📚</span>
+                        </div>
+                        <p class="text-xs text-purple-400 mt-3">This Semester</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-yellow-500 hover:bg-white/10 transition cursor-pointer" onclick="navigate('clubs')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Clubs</h3>
+                                <p class="text-4xl font-black mt-2">3</p>
+                            </div>
+                            <span class="text-2xl">👥</span>
+                        </div>
+                        <button onclick="event.stopPropagation()" class="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded mt-3 hover:bg-yellow-500/40 transition">Explore +</button>
+                    </div>
                 </div>
-                <div class="glass-panel p-6 border-l-4 border-blue-500">
-                    <h3 class="text-lg font-bold">CGPA</h3>
-                    <p class="text-4xl font-black mt-2">${data.cgpa}</p>
-                    <p class="text-sm text-gray-400">Out of 10.0</p>
+
+                <div class="glass-panel p-6 border-t-4 border-purple-500">
+                    <h3 class="text-lg font-bold mb-4">📅 Next Class</h3>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-2xl font-black">${data.upcomingClass}</p>
+                            <p class="text-sm text-gray-400">${data.classTime} • Room 304 • Prof. Sharma</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-400">Starts in</p>
+                            <p class="text-2xl font-black text-blue-400">42 mins</p>
+                        </div>
+                    </div>
+                    <button class="w-full mt-4 bg-blue-500/20 text-blue-400 py-2 rounded-lg hover:bg-blue-500/40 transition font-bold text-sm">📍 View Location</button>
                 </div>
-                <div class="glass-panel p-6 border-l-4 border-purple-500">
-                    <h3 class="text-lg font-bold">Next Class</h3>
-                    <p class="text-2xl font-black mt-2">${data.upcomingClass}</p>
-                    <p class="text-sm text-gray-400">${data.classTime} • Room 304</p>
+
+                <div>
+                    <h3 class="text-lg font-bold mb-4">📢 Campus Announcements</h3>
+                    <div class="space-y-3">
+                        ${announcements.map(ann => `
+                            <div class="glass-panel p-4 border-l-4 border-${ann.color}-500 hover:bg-white/5 transition cursor-pointer">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex gap-3 flex-1">
+                                        <span class="text-2xl">${ann.icon}</span>
+                                        <div>
+                                            <p class="font-bold">${ann.title}</p>
+                                            <p class="text-xs text-gray-500">${ann.date}</p>
+                                        </div>
+                                    </div>
+                                    <button onclick="event.stopPropagation()" class="text-xs bg-white/10 px-3 py-1 rounded hover:bg-white/20 transition">Read</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
             </div>`;
         }
@@ -505,21 +1770,39 @@
                 'Data Structures': 90,
                 'Algorithms': 85,
                 'DBMS': 88,
-                'Operating Systems': 92
+                'Operating Systems': 92,
+                'Cloud Computing': 87
             };
 
-            c.innerHTML = `<div class="glass-panel p-8 fade-in">
-                <h3 class="text-2xl font-bold mb-6">Subject-wise Attendance</h3>
-                <div class="space-y-4">
-                    ${Object.entries(attendance).map(([subject, percent]) => `
+            const avgAttendance = Math.round(Object.values(attendance).reduce((a, b) => a + b) / Object.entries(attendance).length);
+
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="glass-panel p-6 bg-gradient-to-r from-green-500/20 to-blue-500/20 border border-green-500/30">
+                    <div class="flex justify-between items-center">
                         <div>
-                            <div class="flex justify-between text-sm mb-2">
-                                <span class="font-bold">${subject}</span>
-                                <span class="${percent >= 75 ? 'text-green-400' : 'text-red-400'}">${percent}%</span>
+                            <p class="text-sm text-gray-400">Average Attendance</p>
+                            <p class="text-4xl font-black mt-2">${avgAttendance}%</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-4xl">✅</span>
+                            <p class="text-xs text-green-400 mt-2">On Track</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    ${Object.entries(attendance).map(([subject, percent]) => `
+                        <div class="glass-panel p-5 border-l-4 border-${percent >= 75 ? 'green' : 'red'}-500 hover:bg-white/5 transition">
+                            <div class="flex justify-between items-start mb-3">
+                                <h4 class="font-bold text-lg">${subject}</h4>
+                                <span class="text-xs bg-${percent >= 75 ? 'green' : 'red'}-500/20 text-${percent >= 75 ? 'green' : 'red'}-400 px-3 py-1 rounded-full font-bold">${percent}%</span>
                             </div>
                             <div class="w-full bg-white/10 h-3 rounded-full overflow-hidden">
-                                <div class="h-full ${percent >= 75 ? 'bg-green-500' : 'bg-red-500'}" 
+                                <div class="h-full bg-${percent >= 75 ? 'green' : 'red'}-500" 
                                      style="width: ${percent}%"></div>
+                            </div>
+                            <div class="flex justify-between mt-3 text-xs text-gray-400">
+                                <span>${percent >= 75 ? '✓ Safe' : '⚠ At Risk'}</span>
+                                <button class="bg-white/10 px-2 py-1 rounded hover:bg-white/20 transition">View Details</button>
                             </div>
                         </div>
                     `).join('')}
@@ -536,20 +1819,43 @@
                 'Mid-Term 1': {
                     'Data Structures': 85,
                     'Algorithms': 90,
-                    'DBMS': 88
+                    'DBMS': 88,
+                    'Web Development': 92,
+                    'Cloud Computing': 87
+                },
+                'Mid-Term 2': {
+                    'Data Structures': 88,
+                    'Algorithms': 92,
+                    'DBMS': 90
                 }
             };
 
-            c.innerHTML = `<div class="glass-panel p-8 fade-in">
-                <h3 class="text-2xl font-bold mb-6">Recent Exam Results</h3>
+            const allScores = Object.values(marks).flatMap(exam => Object.values(exam));
+            const avgScore = Math.round(allScores.reduce((a, b) => a + b) / allScores.length);
+
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="glass-panel p-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-sm text-gray-400">Average Score</p>
+                            <p class="text-4xl font-black mt-2">${avgScore}%</p>
+                        </div>
+                        <span class="text-5xl">📈</span>
+                    </div>
+                </div>
                 ${Object.entries(marks).map(([exam, subjects]) => `
-                    <div class="mb-6">
-                        <h4 class="font-bold text-lg mb-3 text-purple-400">${exam}</h4>
-                        <div class="space-y-2">
+                    <div class="glass-panel p-6 border-t-4 border-purple-500">
+                        <h4 class="font-bold text-xl mb-4 text-purple-300 flex items-center gap-2">
+                            <span>📋</span> ${exam}
+                        </h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             ${Object.entries(subjects).map(([subject, score]) => `
-                                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                                    <span>${subject}</span>
-                                    <span class="font-black text-xl">${score}/100</span>
+                                <div class="flex justify-between items-center p-4 bg-white/5 hover:bg-white/10 transition rounded-lg border border-white/5">
+                                    <span class="font-bold">${subject}</span>
+                                    <div class="text-right">
+                                        <span class="font-black text-2xl text-${score >= 90 ? 'green' : score >= 80 ? 'yellow' : 'red'}-400">${score}</span>
+                                        <p class="text-xs text-gray-500">/100</p>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
@@ -566,113 +1872,231 @@
             // Listen for real-time updates
             listenToData('mess/menu', (menu) => {
                 const data = menu || {
-                    breakfast: 'Aloo Paratha',
-                    lunch: 'Rajma Chawal',
-                    dinner: 'Paneer Butter Masala'
+                    breakfast: 'Aloo Paratha with Butter',
+                    lunch: 'Rajma Chawal with Pickle',
+                    dinner: 'Paneer Butter Masala with Naan',
+                    snacks: 'Samosa & Chai'
                 };
 
-                c.innerHTML = `<div class="glass-panel p-8 fade-in">
-                    <h3 class="text-2xl font-bold mb-6">Today's Menu</h3>
-                    <div class="space-y-6">
-                        <div class="border-l-4 border-yellow-400 pl-6">
-                            <p class="text-xs text-gray-400 uppercase">Breakfast</p>
-                            <p class="text-2xl font-black">${data.breakfast}</p>
+                c.innerHTML = `<div class="space-y-6 fade-in">
+                    <div class="glass-panel p-6 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30">
+                        <p class="text-sm">🍽️ Today's meals are prepared fresh. Ratings: ⭐⭐⭐⭐ (4.5/5)</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-panel p-8 border-t-4 border-yellow-400 hover:bg-white/5 transition">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">🌅 Breakfast</h3>
+                                <span class="text-xs bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full">6:30 AM</span>
+                            </div>
+                            <p class="text-2xl font-black mb-3">${data.breakfast}</p>
+                            <div class="flex gap-2">
+                                <button onclick="rateMeal('breakfast', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('breakfast', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                            </div>
                         </div>
-                        <div class="border-l-4 border-orange-400 pl-6">
-                            <p class="text-xs text-gray-400 uppercase">Lunch</p>
-                            <p class="text-2xl font-black">${data.lunch}</p>
+                        <div class="glass-panel p-8 border-t-4 border-orange-400 hover:bg-white/5 transition">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">🍲 Lunch</h3>
+                                <span class="text-xs bg-orange-500/20 text-orange-300 px-3 py-1 rounded-full">12:30 PM</span>
+                            </div>
+                            <p class="text-2xl font-black mb-3">${data.lunch}</p>
+                            <div class="flex gap-2">
+                                <button onclick="rateMeal('lunch', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('lunch', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                            </div>
                         </div>
-                        <div class="border-l-4 border-purple-400 pl-6">
-                            <p class="text-xs text-gray-400 uppercase">Dinner</p>
-                            <p class="text-2xl font-black">${data.dinner}</p>
+                        <div class="glass-panel p-8 border-t-4 border-purple-400 hover:bg-white/5 transition">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">🍛 Dinner</h3>
+                                <span class="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">7:30 PM</span>
+                            </div>
+                            <p class="text-2xl font-black mb-3">${data.dinner}</p>
+                            <div class="flex gap-2">
+                                <button onclick="rateMeal('dinner', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('dinner', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                            </div>
+                        </div>
+                        <div class="glass-panel p-8 border-t-4 border-cyan-400 hover:bg-white/5 transition">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">☕ Snacks</h3>
+                                <span class="text-xs bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full">4:00 PM</span>
+                            </div>
+                            <p class="text-2xl font-black mb-3">${data.snacks}</p>
+                            <div class="flex gap-2">
+                                <button onclick="rateMeal('snacks', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('snacks', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                            </div>
                         </div>
                     </div>
                 </div>`;
             });
         }
+        
+        function rateMeal(mealType, rating) {
+            playSound('notification');
+            const emoji = rating === 'thumbsup' ? '👍' : '👎';
+            triggerAction(`${emoji} Thanks for your feedback on ${mealType}!`);
+            saveData(`mess/ratings/${mealType}/${Date.now()}`, {meal: mealType, rating: rating, timestamp: new Date().toISOString()});
+        }
 
         // Load Transport Data
         async function loadTransportData() {
-            const data = await getData('transport/shuttles') || [
-                {name: 'Campus Loop A', status: 'Arriving Main Gate', color: 'blue'},
-                {name: 'City Connector', status: 'Delayed (10m)', color: 'yellow'}
-            ];
+            const data = await getData('transport/shuttles') || mockData['transport/shuttles'] || [];
 
-            document.getElementById('transportList').innerHTML = data.map(bus => `
-                <div class="glass-panel p-6 flex justify-between items-center">
-                    <div class="flex gap-4">
-                        <div class="w-12 h-12 bg-${bus.color}-500/20 rounded-full flex items-center justify-center text-${bus.color}-500">
-                            <i class="fa-solid fa-van-shuttle"></i>
+            document.getElementById('transportList').innerHTML = `<div class="space-y-4">${data.map(bus => `
+                <div class="glass-panel p-6 border-l-4 border-${bus.color}-500 hover:bg-white/5 transition">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex gap-4 flex-1">
+                            <div class="w-12 h-12 bg-${bus.color}-500/20 rounded-full flex items-center justify-center text-${bus.color}-500 text-lg">
+                                <i class="fa-solid fa-van-shuttle"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">${bus.name}</h4>
+                                <p class="text-xs text-${bus.color}-400 font-bold">${bus.status}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="font-bold">${bus.name}</h4>
-                            <p class="text-xs text-green-400">${bus.status}</p>
-                        </div>
+                        <span class="text-sm bg-white/10 px-3 py-1 rounded font-bold">${bus.capacity}</span>
                     </div>
-                    <button class="text-xs bg-white/10 px-3 py-1 rounded">Track</button>
+                    <div class="w-full bg-white/10 h-2 rounded-full mb-3">
+                        <div class="h-full bg-${bus.color}-500 rounded-full" style="width: ${(bus.capacity.split('/')[0] / bus.capacity.split('/')[1]) * 100}%"></div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-${bus.color}-500/20 text-${bus.color}-400 py-2 rounded text-xs font-bold hover:bg-${bus.color}-500/40 transition">📍 Track</button>
+                        <button class="flex-1 bg-white/10 text-white py-2 rounded text-xs font-bold hover:bg-white/20 transition">🔔 Notify</button>
+                    </div>
                 </div>
-            `).join('');
+            `).join('')}</div>`;
         }
 
         // Load Sustainability Data
         async function loadSustainabilityData() {
             const data = await getData('campus/sustainability') || {
                 solar: 840,
-                wind: 320
+                wind: 320,
+                water_saved: 1250,
+                co2_reduced: 450
             };
 
             document.getElementById('energyStats').innerHTML = `
-                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                    <div class="flex justify-between items-start mb-2">
-                        <i class="fa-solid fa-solar-panel text-2xl text-yellow-400"></i>
-                        <span class="text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold">ACTIVE</span>
+                <div class="bg-yellow-500/10 p-5 rounded-xl border border-yellow-500/20 hover:bg-yellow-500/20 transition cursor-pointer">
+                    <div class="flex justify-between items-start mb-3">
+                        <i class="fa-solid fa-solar-panel text-3xl text-yellow-400"></i>
+                        <span class="text-[10px] bg-yellow-500/30 text-yellow-200 px-3 py-1 rounded-full font-bold">ACTIVE</span>
                     </div>
-                    <p class="text-xs text-gray-400 uppercase font-bold">Solar Output</p>
-                    <p class="text-2xl font-black">${data.solar} kWh</p>
+                    <p class="text-xs text-gray-400 uppercase font-bold mb-1">☀️ Solar Output</p>
+                    <p class="text-3xl font-black text-yellow-300">${data.solar} <span class="text-lg">kWh</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Powering 240 buildings</p>
                 </div>
-                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
-                    <div class="flex justify-between items-start mb-2">
-                        <i class="fa-solid fa-wind text-2xl text-cyan-400"></i>
-                        <span class="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded font-bold">OPTIMAL</span>
+                <div class="bg-cyan-500/10 p-5 rounded-xl border border-cyan-500/20 hover:bg-cyan-500/20 transition cursor-pointer">
+                    <div class="flex justify-between items-start mb-3">
+                        <i class="fa-solid fa-wind text-3xl text-cyan-400"></i>
+                        <span class="text-[10px] bg-cyan-500/30 text-cyan-200 px-3 py-1 rounded-full font-bold">OPTIMAL</span>
                     </div>
-                    <p class="text-xs text-gray-400 uppercase font-bold">Wind Output</p>
-                    <p class="text-2xl font-black">${data.wind} kWh</p>
+                    <p class="text-xs text-gray-400 uppercase font-bold mb-1">💨 Wind Output</p>
+                    <p class="text-3xl font-black text-cyan-300">${data.wind} <span class="text-lg">kWh</span></p>
+                    <p class="text-xs text-gray-500 mt-2">3 turbines running</p>
+                </div>
+                <div class="bg-blue-500/10 p-5 rounded-xl border border-blue-500/20 hover:bg-blue-500/20 transition cursor-pointer">
+                    <div class="flex justify-between items-start mb-3">
+                        <i class="fa-solid fa-droplet text-3xl text-blue-400"></i>
+                        <span class="text-[10px] bg-blue-500/30 text-blue-200 px-3 py-1 rounded-full font-bold">SAVED</span>
+                    </div>
+                    <p class="text-xs text-gray-400 uppercase font-bold mb-1">💧 Water Saved</p>
+                    <p class="text-3xl font-black text-blue-300">${data.water_saved} <span class="text-lg">L</span></p>
+                    <p class="text-xs text-gray-500 mt-2">Rainwater harvesting</p>
+                </div>
+                <div class="bg-green-500/10 p-5 rounded-xl border border-green-500/20 hover:bg-green-500/20 transition cursor-pointer">
+                    <div class="flex justify-between items-start mb-3">
+                        <i class="fa-solid fa-leaf text-3xl text-green-400"></i>
+                        <span class="text-[10px] bg-green-500/30 text-green-200 px-3 py-1 rounded-full font-bold">REDUCED</span>
+                    </div>
+                    <p class="text-xs text-gray-400 uppercase font-bold mb-1">🌍 CO₂ Reduced</p>
+                    <p class="text-3xl font-black text-green-300">${data.co2_reduced} <span class="text-lg">kg</span></p>
+                    <p class="text-xs text-gray-500 mt-2">This month</p>
                 </div>
             `;
+        }
         }
 
         // Load Clubs Data
         async function loadClubsData() {
             const c = document.getElementById('contentArea');
-            const clubs = await getData('clubs/list') || [
-                {name: 'GDSC', color: 'blue'},
-                {name: 'E-Cell', color: 'orange'},
-                {name: 'Lit Soc', color: 'pink'}
-            ];
+            const clubs = await getData('clubs/list') || mockData['clubs/list'] || [];
 
-            c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
-                ${clubs.map(club => `
-                    <div class="glass-panel p-6 border-t-4 border-${club.color}-500">
-                        <h3 class="text-xl font-bold">${club.name}</h3>
-                        <button class="w-full bg-white/10 py-2 rounded-lg text-xs font-bold mt-4" 
-                                onclick="joinClub('${club.name}')">
-                            JOIN
-                        </button>
-                    </div>
-                `).join('')}
+            let joinedClubs = JSON.parse(localStorage.getItem('joinedClubs') || '[]');
+
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="glass-panel p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30">
+                    <p class="text-sm">🎯 Join clubs to connect with like-minded students and grow your network!</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${clubs.map(club => `
+                        <div class="glass-panel p-6 border-t-4 border-${club.color}-500 hover:bg-white/5 transition group">
+                            <div class="flex justify-between items-start mb-3">
+                                <h3 class="text-xl font-bold">${club.name}</h3>
+                                <span class="text-2xl group-hover:scale-110 transition">🎖️</span>
+                            </div>
+                            <p class="text-sm text-gray-400 mb-3">${club.description || 'Amazing club'}</p>
+                            <p class="text-xs text-gray-500 mb-4">👥 ${club.members || 'N/A'} members</p>
+                            <button class="w-full ${joinedClubs.includes(club.name) ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white hover:bg-white/20'} py-2 rounded-lg text-xs font-bold transition" 
+                                    onclick="joinClub('${club.name}')">
+                                ${joinedClubs.includes(club.name) ? '✓ Joined' : 'Join Now'}
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
             </div>`;
         }
 
         async function joinClub(clubName) {
+            playSound('click');
+            let joinedClubs = JSON.parse(localStorage.getItem('joinedClubs') || '[]');
+            const isJoined = joinedClubs.includes(clubName);
+            
+            if (isJoined) {
+                joinedClubs = joinedClubs.filter(c => c !== clubName);
+                triggerAction(`Left ${clubName}`);
+            } else {
+                joinedClubs.push(clubName);
+                triggerAction(`Joined ${clubName}! 🎉`);
+            }
+            
+            localStorage.setItem('joinedClubs', JSON.stringify(joinedClubs));
             const success = await saveData('students/student_001/clubs/' + clubName, {
-                joined: new Date().toISOString()
+                joined: new Date().toISOString(),
+                status: isJoined ? 'left' : 'joined'
             });
             if (success) {
-                triggerAction(`Joined ${clubName}! 🎉`);
+                loadClubsData();
             }
         }
 
+        // Load Perks Data
+        async function loadPerksData() {
+            const c = document.getElementById('contentArea');
+            const perks = mockData['perks'] || [];
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="glass-panel p-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+                    <p class="text-sm">💡 Exclusive discounts & offers available to all students. Update your profile to unlock more!</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${perks.map((perk, idx) => `
+                        <div class="glass-panel p-6 border-t-4 border-${['green','blue','purple','pink','yellow','cyan'][idx % 6]}-500 hover:bg-white/10 transition group cursor-pointer">
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="text-4xl group-hover:scale-125 transition">${perk.icon}</span>
+                                <span class="bg-${['green','blue','purple','pink','yellow','cyan'][idx % 6]}-500/20 text-${['green','blue','purple','pink','yellow','cyan'][idx % 6]}-300 text-xs px-3 py-1 rounded-full font-bold">${perk.discount}</span>
+                            </div>
+                            <h3 class="font-bold text-lg">${perk.title}</h3>
+                            <p class="text-xs text-gray-400 mt-2">${perk.use || perk.brands || perk.courses}</p>
+                            <button onclick="event.stopPropagation()" class="w-full mt-4 bg-white/10 hover:bg-white/20 transition text-white py-2 rounded-lg text-xs font-bold">Claim Now →</button>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
         async function submitReport(type) {
+            playSound('click');
             const textareaId = type === 'ragging' ? 'ragReport' : 'wasteReport';
             const text = document.getElementById(textareaId).value;
             
@@ -776,6 +2200,7 @@
         }
 
         async function saveAttendanceRecord() {
+            playSound('notification');
             if (Object.keys(attendanceRecord).length === 0) {
                 alert('Please mark attendance for at least one student');
                 return;
@@ -789,6 +2214,7 @@
         }
 
         async function uploadMarks() {
+            playSound('click');
             const subject = document.getElementById('subjectCode').value;
             const roll = document.getElementById('studentRoll').value;
             const marks = document.getElementById('marksObtained').value;
@@ -808,6 +2234,7 @@
         }
 
         async function postNotice() {
+            playSound('click');
             const text = document.getElementById('noticeText').value;
             if (!text.trim()) {
                 alert('Please type a notice');
@@ -845,25 +2272,53 @@
             const c = document.getElementById('contentArea');
             const data = await getData('mess/dashboard') || {
                 mealsServed: 450,
-                feedback: 4.5
+                feedback: 4.5,
+                todayMeals: 385,
+                peakHour: '12:30 PM'
             };
 
-            c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
-                <div class="glass-panel p-6 border-l-4 border-green-500">
-                    <h3 class="text-lg font-bold">Meals Served</h3>
-                    <p class="text-4xl font-black mt-2">${data.mealsServed}</p>
-                    <p class="text-sm text-gray-400">Lunch Session</p>
-                </div>
-                <div class="glass-panel p-6 border-l-4 border-red-500">
-                    <h3 class="text-lg font-bold">Low Stock</h3>
-                    <p class="text-xl font-bold mt-2 text-red-400">Rice & Oil</p>
-                    <button class="mt-2 text-xs bg-red-500/20 px-2 py-1 rounded text-red-400" 
-                            onclick="renderMess('inventory')">Check</button>
-                </div>
-                <div class="glass-panel p-6">
-                    <h3 class="text-lg font-bold">Feedback</h3>
-                    <p class="text-3xl font-black mt-2">${data.feedback}/5</p>
-                    <p class="text-sm text-gray-400">Avg Rating</p>
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-panel p-6 border-l-4 border-green-500 hover:bg-white/5 transition cursor-pointer" onclick="renderMess('inventory')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Meals Served</h3>
+                                <p class="text-3xl font-black mt-2">${data.mealsServed}</p>
+                            </div>
+                            <span class="text-2xl">🍽️</span>
+                        </div>
+                        <p class="text-xs text-green-400 mt-3">↑ 12% from yesterday</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-red-500 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Low Stock</h3>
+                                <p class="text-2xl font-black mt-2 text-red-400">3 Items</p>
+                            </div>
+                            <span class="text-2xl">⚠️</span>
+                        </div>
+                        <button onclick="renderMess('inventory')" class="mt-3 text-xs bg-red-500/20 px-3 py-1 rounded text-red-400 hover:bg-red-500/40 transition font-bold">⚙️ Check Now</button>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-yellow-500 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Rating</h3>
+                                <p class="text-3xl font-black mt-2">${data.feedback}</p>
+                            </div>
+                            <span class="text-2xl">⭐</span>
+                        </div>
+                        <p class="text-xs text-yellow-400 mt-3">Out of 5.0</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-blue-500 hover:bg-white/5 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Today</h3>
+                                <p class="text-3xl font-black mt-2">${data.todayMeals}</p>
+                            </div>
+                            <span class="text-2xl">📊</span>
+                        </div>
+                        <p class="text-xs text-blue-400 mt-3">Peak: ${data.peakHour}</p>
+                    </div>
                 </div>
             </div>`;
         }
@@ -906,6 +2361,7 @@
         }
 
         async function orderRestock() {
+            playSound('notification');
             const success = await saveData('mess/restockOrders/' + Date.now(), {
                 timestamp: new Date().toISOString(),
                 items: ['rice', 'oil']
@@ -949,6 +2405,7 @@
         }
 
         async function publishMenu() {
+            playSound('success');
             const menu = {
                 breakfast: document.getElementById('breakfast').value,
                 lunch: document.getElementById('lunch').value,

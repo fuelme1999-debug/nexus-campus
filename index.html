@@ -8,10 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rye&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     
     <style>
         :root {
@@ -202,28 +199,46 @@
     </div>
 
     <script>
-        // ==================== FIREBASE CONFIG ====================
-        // TODO: Replace with your Firebase config from Firebase Console
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
+        // ==================== MOCK DATA STORAGE ====================
+        // Using localStorage for data persistence instead of Firebase
+        const mockData = {
+            'students/student_001/marks': {
+                'Mid-Term 1': {
+                    'Data Structures': 85,
+                    'Algorithms': 90,
+                    'DBMS': 88
+                }
+            },
+            'mess/menu': {
+                breakfast: 'Aloo Paratha',
+                lunch: 'Rajma Chawal',
+                dinner: 'Paneer Butter Masala'
+            },
+            'transport/shuttles': [
+                {name: 'Campus Loop A', status: 'Arriving Main Gate', color: 'blue'},
+                {name: 'City Connector', status: 'Delayed (10m)', color: 'yellow'}
+            ],
+            'campus/sustainability': {
+                solar: 840,
+                wind: 320
+            },
+            'clubs/list': [
+                {name: 'GDSC', color: 'blue'},
+                {name: 'E-Cell', color: 'orange'},
+                {name: 'Lit Soc', color: 'pink'}
+            ],
+            'mess/dashboard': {
+                mealsServed: 450,
+                feedback: 4.5
+            },
+            'mess/inventory': {
+                rice: 20,
+                flour: 45,
+                oil: 80
+            }
         };
 
-        // Initialize Firebase
-        let db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-            console.log("✅ Firebase Connected!");
-        } catch (error) {
-            console.error("❌ Firebase Error:", error);
-            alert("Firebase not configured. Please follow SETUP.md instructions.");
-        }
+        console.log("✅ Local Storage Initialized!");
 
         // ==================== STATE & UTILS ====================
         let currentRole = 'student';
@@ -242,52 +257,62 @@
             playSound('success');
         }
 
-        // ==================== FIREBASE HELPERS ====================
+        // ==================== LOCAL STORAGE HELPERS ====================
         
-        // Save data to Firebase
+        // Save data to localStorage
         function saveData(path, data) {
-            return db.ref(path).set(data)
-                .then(() => {
+            return new Promise((resolve) => {
+                try {
+                    localStorage.setItem(path, JSON.stringify(data));
                     console.log("✅ Data saved:", path);
-                    return true;
-                })
-                .catch((error) => {
+                    resolve(true);
+                } catch (error) {
                     console.error("❌ Save failed:", error);
                     alert("Failed to save data. Check console.");
-                    return false;
-                });
-        }
-
-        // Update data in Firebase
-        function updateData(path, data) {
-            return db.ref(path).update(data)
-                .then(() => {
-                    console.log("✅ Data updated:", path);
-                    return true;
-                })
-                .catch((error) => {
-                    console.error("❌ Update failed:", error);
-                    return false;
-                });
-        }
-
-        // Get data from Firebase
-        function getData(path) {
-            return db.ref(path).once('value')
-                .then((snapshot) => {
-                    return snapshot.val();
-                })
-                .catch((error) => {
-                    console.error("❌ Read failed:", error);
-                    return null;
-                });
-        }
-
-        // Listen for real-time updates
-        function listenToData(path, callback) {
-            db.ref(path).on('value', (snapshot) => {
-                callback(snapshot.val());
+                    resolve(false);
+                }
             });
+        }
+
+        // Update data in localStorage
+        function updateData(path, data) {
+            return new Promise((resolve) => {
+                try {
+                    localStorage.setItem(path, JSON.stringify(data));
+                    console.log("✅ Data updated:", path);
+                    resolve(true);
+                } catch (error) {
+                    console.error("❌ Update failed:", error);
+                    resolve(false);
+                }
+            });
+        }
+
+        // Get data from localStorage
+        function getData(path) {
+            return new Promise((resolve) => {
+                try {
+                    const stored = localStorage.getItem(path);
+                    if (stored) {
+                        resolve(JSON.parse(stored));
+                    } else {
+                        resolve(mockData[path] || null);
+                    }
+                } catch (error) {
+                    console.error("❌ Read failed:", error);
+                    resolve(mockData[path] || null);
+                }
+            });
+        }
+
+        // Listen for real-time updates (localStorage)
+        function listenToData(path, callback) {
+            const stored = localStorage.getItem(path);
+            if (stored) {
+                callback(JSON.parse(stored));
+            } else {
+                callback(mockData[path] || null);
+            }
         }
 
         // ==================== INTRO ANIMATION ====================

@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS | Ultimate Campus OS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Rye&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    
+    <style>
+        :root {
+            --primary: #1DB954;
+            --bg-dark: #09090b;
+            --glass-bg: rgba(24, 24, 27, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: white;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow: hidden;
+            user-select: none;
+            margin: 0; padding: 0;
+        }
+
+        /* --- 1. CINEMATIC INTRO --- */
+        #intro-layer {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #000000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 1s ease-in-out, visibility 1s;
+        }
+        
+        .intro-aura {
+            position: absolute; width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(29, 185, 84, 0.2) 0%, transparent 70%);
+            border-radius: 50%; filter: blur(60px); animation: auraPulse 3s infinite ease-in-out;
+        }
+
+        .intro-logo {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 6rem; font-weight: 900; letter-spacing: -4px; color: white; position: relative; z-index: 10;
+            opacity: 0; transform: scale(1.2); filter: blur(10px);
+            animation: logoReveal 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .intro-sub {
+            font-size: 0.8rem; letter-spacing: 0.8em; text-transform: uppercase; color: #1DB954; margin-top: 1rem;
+            opacity: 0; animation: fadeUp 1s ease 1s forwards;
+        }
+
+        @keyframes auraPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.5; }
+        }
+
+        @keyframes logoReveal {
+            to { opacity: 1; transform: scale(1); filter: blur(0); }
+        }
+
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glass morphism */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+        }
+
+        .glass-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 12px;
+            border-radius: 8px;
+            color: white;
+            outline: none;
+        }
+
+        .glass-input:focus {
+            border-color: var(--primary);
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* Sidebar */
+        #sidebar {
+            width: 280px;
+            background: rgba(12, 12, 14, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 14px 20px;
+            margin: 6px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--primary);
+            color: black;
+            font-weight: 700;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- INTRO SCREEN -->
+    <div id="intro-layer">
+        <div class="intro-aura"></div>
+        <h1 class="intro-logo">NEXUS</h1>
+        <p class="intro-sub">CAMPUS OS</p>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="mainApp" style="display: none; height: 100vh; display: flex;">
+        
+        <!-- Sidebar -->
+        <aside id="sidebar" class="flex flex-col">
+            <div class="p-6 border-b border-white/5">
+                <h1 class="text-2xl font-black">NEXUS</h1>
+                <p class="text-xs text-gray-500">Campus OS v2.0</p>
+            </div>
+            
+            <!-- Role Selection -->
+            <div class="p-4">
+                <select id="roleSelector" class="glass-input text-sm" onchange="switchRole(this.value)">
+                    <option value="student">👨‍🎓 Student</option>
+                    <option value="teacher">👩‍🏫 Teacher</option>
+                    <option value="mess">🍽️ Mess Staff</option>
+                </select>
+            </div>
+
+            <nav id="navMenu" class="flex-1 py-4"></nav>
+
+            <div class="p-4 border-t border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full"></div>
+                    <div>
+                        <p class="font-bold text-sm" id="userName">User</p>
+                        <p class="text-xs text-gray-500">Online</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <header class="p-6 border-b border-white/5 backdrop-blur-xl bg-black/20">
+                <h2 id="viewTitle" class="text-3xl font-black">Dashboard</h2>
+            </header>
+            
+            <div id="contentArea" class="flex-1 overflow-y-auto p-8">
+                <!-- Dynamic content loads here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ==================== FIREBASE CONFIG ====================
+        // TODO: Replace with your Firebase config from Firebase Console
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            console.log("✅ Firebase Connected!");
+        } catch (error) {
+            console.error("❌ Firebase Error:", error);
+            alert("Firebase not configured. Please follow SETUP.md instructions.");
+        }
+
+        // ==================== STATE & UTILS ====================
+        let currentRole = 'student';
+        let currentView = 'dashboard';
+
+        function playSound(type) {
+            // Placeholder for sound effects
+        }
+
+        function setViewTitle(title) {
+            document.getElementById('viewTitle').textContent = title;
+        }
+
+        function triggerAction(msg) {
+            alert(msg);
+            playSound('success');
+        }
+
+        // ==================== FIREBASE HELPERS ====================
+        
+        // Save data to Firebase
+        function saveData(path, data) {
+            return db.ref(path).set(data)
+                .then(() => {
+                    console.log("✅ Data saved:", path);
+                    return true;
+                })
+                .catch((error) => {
+                    console.error("❌ Save failed:", error);
+                    alert("Failed to save data. Check console.");
+                    return false;
+                });
+        }
+
+        // Update data in Firebase
+        function updateData(path, data) {
+            return db.ref(path).update(data)
+                .then(() => {
+                    console.log("✅ Data updated:", path);
+                    return true;
+                })
+                .catch((error) => {
+                    console.error("❌ Update failed:", error);
+                    return false;
+                });
+        }
+
+        // Get data from Firebase
+        function getData(path) {
+            return db.ref(path).once('value')
+                .then((snapshot) => {
+                    return snapshot.val();
+                })
+                .catch((error) => {
+                    console.error("❌ Read failed:", error);
+                    return null;
+                });
+        }
+
+        // Listen for real-time updates
+        function listenToData(path, callback) {
+            db.ref(path).on('value', (snapshot) => {
+                callback(snapshot.val());
+            });
+        }
+
+        // ==================== INTRO ANIMATION ====================
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('intro-layer').style.opacity = '0';
+                document.getElementById('intro-layer').style.visibility = 'hidden';
+                document.getElementById('mainApp').style.display = 'flex';
+                switchRole('student');
+            }, 3500);
+        });
+
+        // ==================== ROLE SWITCHING ====================
+        function switchRole(role) {
+            currentRole = role;
+            playSound('whoosh');
+            
+            const menus = {
+                student: [
+                    {icon: 'fa-home', label: 'Dashboard', view: 'dashboard'},
+                    {icon: 'fa-calendar-check', label: 'Attendance', view: 'attendance'},
+                    {icon: 'fa-graduation-cap', label: 'Academics', view: 'academics'},
+                    {icon: 'fa-utensils', label: 'Mess Menu', view: 'mess'},
+                    {icon: 'fa-bus', label: 'Transport', view: 'transport'},
+                    {icon: 'fa-leaf', label: 'Sustainability', view: 'sustainability'},
+                    {icon: 'fa-users', label: 'Clubs', view: 'clubs'},
+                    {icon: 'fa-gift', label: 'Perks', view: 'perks'},
+                    {icon: 'fa-flag', label: 'Report', view: 'report'}
+                ],
+                teacher: [
+                    {icon: 'fa-home', label: 'Dashboard', view: 'dashboard'},
+                    {icon: 'fa-clipboard-check', label: 'Attendance', view: 'attendance'},
+                    {icon: 'fa-file-alt', label: 'Upload Marks', view: 'marks'},
+                    {icon: 'fa-bullhorn', label: 'Notices', view: 'notices'}
+                ],
+                mess: [
+                    {icon: 'fa-home', label: 'Dashboard', view: 'dashboard'},
+                    {icon: 'fa-warehouse', label: 'Inventory', view: 'inventory'},
+                    {icon: 'fa-book-open', label: 'Menu', view: 'menu'}
+                ]
+            };
+
+            const navMenu = document.getElementById('navMenu');
+            navMenu.innerHTML = menus[role].map(item => `
+                <div class="nav-item ${item.view === 'dashboard' ? 'active' : ''}" 
+                     onclick="navigate('${item.view}')">
+                    <i class="fa-solid ${item.icon}"></i>
+                    <span>${item.label}</span>
+                </div>
+            `).join('');
+
+            navigate('dashboard');
+        }
+
+        function navigate(view) {
+            currentView = view;
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event?.currentTarget?.classList.add('active');
+
+            if (currentRole === 'student') renderStudent(view);
+            else if (currentRole === 'teacher') renderTeacher(view);
+            else if (currentRole === 'mess') renderMess(view);
+        }
+
+        // ==================== STUDENT VIEWS ====================
+        function renderStudent(view) {
+            playSound('click');
+            const c = document.getElementById('contentArea');
+            
+            if (view === 'dashboard') {
+                setViewTitle('Student Dashboard');
+                loadDashboardData();
+            } else if (view === 'attendance') {
+                setViewTitle('My Attendance');
+                loadAttendanceData();
+            } else if (view === 'academics') {
+                setViewTitle('Academics');
+                loadAcademicsData();
+            } else if (view === 'mess') {
+                setViewTitle('Mess Menu');
+                loadMessMenuData();
+            } else if (view === 'transport') {
+                setViewTitle('Transport');
+                c.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 fade-in">
+                    <div class="glass-panel p-8 relative overflow-hidden h-[400px]">
+                        <iframe src="https://maps.google.com/maps?q=Hisar&t=&z=13&ie=UTF8&iwloc=&output=embed" 
+                                width="100%" height="100%" style="border:0; filter: invert(90%) hue-rotate(180deg);" 
+                                allowfullscreen="" loading="lazy"></iframe>
+                        <div class="absolute bottom-4 left-4 bg-black/80 backdrop-blur p-4 rounded-xl border border-white/10">
+                            <h4 class="font-bold text-white"><i class="fa-solid fa-bus text-yellow-400 mr-2"></i>Shuttle 4</h4>
+                            <p class="text-xs text-gray-400">Speed: 45 km/h • ETA: 5 mins</p>
+                        </div>
+                    </div>
+                    <div id="transportList" class="space-y-4">
+                        <div class="loading-spinner mx-auto"></div>
+                    </div>
+                </div>`;
+                loadTransportData();
+            } else if (view === 'sustainability') {
+                setViewTitle('Sustainability');
+                c.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 fade-in">
+                    <div class="glass-panel p-8 lg:col-span-2 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-32 bg-green-500/10 rounded-full blur-3xl"></div>
+                        <h2 class="text-2xl font-black mb-6 flex items-center gap-3">
+                            <i class="fa-solid fa-bolt text-yellow-400"></i> Campus Energy Grid
+                        </h2>
+                        <div id="energyStats" class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="loading-spinner"></div>
+                        </div>
+                    </div>
+                </div>`;
+                loadSustainabilityData();
+            } else if (view === 'clubs') {
+                setViewTitle('Clubs');
+                loadClubsData();
+            } else if (view === 'perks') {
+                setViewTitle('Perks');
+                c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 fade-in">
+                    <a href="#" class="glass-panel p-6 text-center hover:bg-white/5 border-t-4 border-green-500">
+                        <div class="text-4xl mb-4">🛍️</div>
+                        <h3 class="font-bold">UNiDAYS</h3>
+                        <p class="text-xs text-gray-400 mt-2">Discounts on Apple & Nike</p>
+                    </a>
+                    <a href="#" class="glass-panel p-6 text-center hover:bg-white/5 border-t-4 border-blue-500">
+                        <div class="text-4xl mb-4">🎓</div>
+                        <h3 class="font-bold">Coursera</h3>
+                        <p class="text-xs text-gray-400 mt-2">Free Courses</p>
+                    </a>
+                </div>`;
+            } else if (view === 'report') {
+                setViewTitle('Report Issue');
+                c.innerHTML = `<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-in">
+                    <div class="glass-panel p-8 border-l-4 border-red-500">
+                        <h3 class="text-2xl font-bold mb-4">Anti-Ragging</h3>
+                        <textarea id="ragReport" class="w-full glass-input mb-4" rows="3" placeholder="Describe incident..."></textarea>
+                        <button onclick="submitReport('ragging')" class="w-full bg-red-500 text-white font-black py-4 rounded-xl text-xs uppercase">
+                            Submit Report
+                        </button>
+                    </div>
+                    <div class="glass-panel p-8 border-l-4 border-yellow-500">
+                        <h3 class="text-2xl font-bold mb-4">Waste / Hazard</h3>
+                        <textarea id="wasteReport" class="w-full glass-input mb-4" rows="3" placeholder="Describe issue..."></textarea>
+                        <button onclick="submitReport('waste')" class="w-full bg-yellow-500 text-black font-black py-4 rounded-xl text-xs uppercase">
+                            Submit Report
+                        </button>
+                    </div>
+                </div>`;
+            }
+        }
+
+        // Load Dashboard Data from Firebase
+        async function loadDashboardData() {
+            const c = document.getElementById('contentArea');
+            c.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            
+            const data = await getData('students/student_001/dashboard') || {
+                attendance: 85,
+                cgpa: 8.5,
+                upcomingClass: 'Data Structures',
+                classTime: '10:00 AM'
+            };
+
+            c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+                <div class="glass-panel p-6 border-l-4 border-green-500">
+                    <h3 class="text-lg font-bold">Attendance</h3>
+                    <p class="text-4xl font-black mt-2">${data.attendance}%</p>
+                    <p class="text-sm text-gray-400">Current Semester</p>
+                </div>
+                <div class="glass-panel p-6 border-l-4 border-blue-500">
+                    <h3 class="text-lg font-bold">CGPA</h3>
+                    <p class="text-4xl font-black mt-2">${data.cgpa}</p>
+                    <p class="text-sm text-gray-400">Out of 10.0</p>
+                </div>
+                <div class="glass-panel p-6 border-l-4 border-purple-500">
+                    <h3 class="text-lg font-bold">Next Class</h3>
+                    <p class="text-2xl font-black mt-2">${data.upcomingClass}</p>
+                    <p class="text-sm text-gray-400">${data.classTime} • Room 304</p>
+                </div>
+            </div>`;
+        }
+
+        // Load Attendance Data
+        async function loadAttendanceData() {
+            const c = document.getElementById('contentArea');
+            c.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            
+            const attendance = await getData('students/student_001/attendance') || {
+                'Data Structures': 90,
+                'Algorithms': 85,
+                'DBMS': 88,
+                'Operating Systems': 92
+            };
+
+            c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                <h3 class="text-2xl font-bold mb-6">Subject-wise Attendance</h3>
+                <div class="space-y-4">
+                    ${Object.entries(attendance).map(([subject, percent]) => `
+                        <div>
+                            <div class="flex justify-between text-sm mb-2">
+                                <span class="font-bold">${subject}</span>
+                                <span class="${percent >= 75 ? 'text-green-400' : 'text-red-400'}">${percent}%</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-3 rounded-full overflow-hidden">
+                                <div class="h-full ${percent >= 75 ? 'bg-green-500' : 'bg-red-500'}" 
+                                     style="width: ${percent}%"></div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        // Load Academics/Marks Data
+        async function loadAcademicsData() {
+            const c = document.getElementById('contentArea');
+            c.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            
+            const marks = await getData('students/student_001/marks') || {
+                'Mid-Term 1': {
+                    'Data Structures': 85,
+                    'Algorithms': 90,
+                    'DBMS': 88
+                }
+            };
+
+            c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                <h3 class="text-2xl font-bold mb-6">Recent Exam Results</h3>
+                ${Object.entries(marks).map(([exam, subjects]) => `
+                    <div class="mb-6">
+                        <h4 class="font-bold text-lg mb-3 text-purple-400">${exam}</h4>
+                        <div class="space-y-2">
+                            ${Object.entries(subjects).map(([subject, score]) => `
+                                <div class="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                                    <span>${subject}</span>
+                                    <span class="font-black text-xl">${score}/100</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
+        // Load Mess Menu
+        async function loadMessMenuData() {
+            const c = document.getElementById('contentArea');
+            c.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+            
+            // Listen for real-time updates
+            listenToData('mess/menu', (menu) => {
+                const data = menu || {
+                    breakfast: 'Aloo Paratha',
+                    lunch: 'Rajma Chawal',
+                    dinner: 'Paneer Butter Masala'
+                };
+
+                c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                    <h3 class="text-2xl font-bold mb-6">Today's Menu</h3>
+                    <div class="space-y-6">
+                        <div class="border-l-4 border-yellow-400 pl-6">
+                            <p class="text-xs text-gray-400 uppercase">Breakfast</p>
+                            <p class="text-2xl font-black">${data.breakfast}</p>
+                        </div>
+                        <div class="border-l-4 border-orange-400 pl-6">
+                            <p class="text-xs text-gray-400 uppercase">Lunch</p>
+                            <p class="text-2xl font-black">${data.lunch}</p>
+                        </div>
+                        <div class="border-l-4 border-purple-400 pl-6">
+                            <p class="text-xs text-gray-400 uppercase">Dinner</p>
+                            <p class="text-2xl font-black">${data.dinner}</p>
+                        </div>
+                    </div>
+                </div>`;
+            });
+        }
+
+        // Load Transport Data
+        async function loadTransportData() {
+            const data = await getData('transport/shuttles') || [
+                {name: 'Campus Loop A', status: 'Arriving Main Gate', color: 'blue'},
+                {name: 'City Connector', status: 'Delayed (10m)', color: 'yellow'}
+            ];
+
+            document.getElementById('transportList').innerHTML = data.map(bus => `
+                <div class="glass-panel p-6 flex justify-between items-center">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 bg-${bus.color}-500/20 rounded-full flex items-center justify-center text-${bus.color}-500">
+                            <i class="fa-solid fa-van-shuttle"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">${bus.name}</h4>
+                            <p class="text-xs text-green-400">${bus.status}</p>
+                        </div>
+                    </div>
+                    <button class="text-xs bg-white/10 px-3 py-1 rounded">Track</button>
+                </div>
+            `).join('');
+        }
+
+        // Load Sustainability Data
+        async function loadSustainabilityData() {
+            const data = await getData('campus/sustainability') || {
+                solar: 840,
+                wind: 320
+            };
+
+            document.getElementById('energyStats').innerHTML = `
+                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                    <div class="flex justify-between items-start mb-2">
+                        <i class="fa-solid fa-solar-panel text-2xl text-yellow-400"></i>
+                        <span class="text-[10px] bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded font-bold">ACTIVE</span>
+                    </div>
+                    <p class="text-xs text-gray-400 uppercase font-bold">Solar Output</p>
+                    <p class="text-2xl font-black">${data.solar} kWh</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+                    <div class="flex justify-between items-start mb-2">
+                        <i class="fa-solid fa-wind text-2xl text-cyan-400"></i>
+                        <span class="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-1 rounded font-bold">OPTIMAL</span>
+                    </div>
+                    <p class="text-xs text-gray-400 uppercase font-bold">Wind Output</p>
+                    <p class="text-2xl font-black">${data.wind} kWh</p>
+                </div>
+            `;
+        }
+
+        // Load Clubs Data
+        async function loadClubsData() {
+            const c = document.getElementById('contentArea');
+            const clubs = await getData('clubs/list') || [
+                {name: 'GDSC', color: 'blue'},
+                {name: 'E-Cell', color: 'orange'},
+                {name: 'Lit Soc', color: 'pink'}
+            ];
+
+            c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+                ${clubs.map(club => `
+                    <div class="glass-panel p-6 border-t-4 border-${club.color}-500">
+                        <h3 class="text-xl font-bold">${club.name}</h3>
+                        <button class="w-full bg-white/10 py-2 rounded-lg text-xs font-bold mt-4" 
+                                onclick="joinClub('${club.name}')">
+                            JOIN
+                        </button>
+                    </div>
+                `).join('')}
+            </div>`;
+        }
+
+        async function joinClub(clubName) {
+            const success = await saveData('students/student_001/clubs/' + clubName, {
+                joined: new Date().toISOString()
+            });
+            if (success) {
+                triggerAction(`Joined ${clubName}! 🎉`);
+            }
+        }
+
+        async function submitReport(type) {
+            const textareaId = type === 'ragging' ? 'ragReport' : 'wasteReport';
+            const text = document.getElementById(textareaId).value;
+            
+            if (!text.trim()) {
+                alert('Please describe the issue');
+                return;
+            }
+
+            const success = await saveData('reports/' + type + '/' + Date.now(), {
+                description: text,
+                timestamp: new Date().toISOString(),
+                studentId: 'student_001'
+            });
+
+            if (success) {
+                document.getElementById(textareaId).value = '';
+                triggerAction('Report submitted successfully! 🛡️');
+            }
+        }
+
+        // ==================== TEACHER VIEWS ====================
+        function renderTeacher(view) {
+            playSound('click');
+            const c = document.getElementById('contentArea');
+            setViewTitle("Faculty " + view.charAt(0).toUpperCase() + view.slice(1));
+
+            if (view === 'dashboard') {
+                c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+                    <div class="glass-panel p-6 border-l-4 border-purple-500">
+                        <h3 class="text-lg font-bold">Next Lecture</h3>
+                        <p class="text-3xl font-black mt-2">CSE-A</p>
+                        <p class="text-sm text-gray-400">10:00 AM • Room 304</p>
+                        <button class="mt-4 w-full bg-purple-500/20 text-purple-300 py-2 rounded-lg font-bold text-xs" 
+                                onclick="renderTeacher('attendance')">
+                            Start Attendance
+                        </button>
+                    </div>
+                </div>`;
+            } else if (view === 'attendance') {
+                loadTeacherAttendance();
+            } else if (view === 'marks') {
+                c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                    <h3 class="text-2xl font-bold mb-6">Upload Marks</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="subjectCode" class="glass-input" placeholder="Subject Code (e.g., CS101)">
+                        <input type="text" id="studentRoll" class="glass-input" placeholder="Student Roll No">
+                        <input type="number" id="marksObtained" class="glass-input" placeholder="Marks Obtained" min="0" max="100">
+                        <button class="w-full bg-blue-500 text-white font-bold py-3 rounded-xl" 
+                                onclick="uploadMarks()">
+                            Upload Marks
+                        </button>
+                    </div>
+                </div>`;
+            } else if (view === 'notices') {
+                c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                    <h3 class="text-2xl font-bold mb-4">Post Notice</h3>
+                    <textarea id="noticeText" class="w-full glass-input mb-4" rows="4" placeholder="Type notice here..."></textarea>
+                    <button class="w-full bg-white/10 text-white font-bold py-3 rounded-xl hover:bg-white/20" 
+                            onclick="postNotice()">
+                        Broadcast Notice
+                    </button>
+                </div>`;
+            }
+        }
+
+        async function loadTeacherAttendance() {
+            const c = document.getElementById('contentArea');
+            const students = ['Student 101', 'Student 102', 'Student 103', 'Student 104', 'Student 105'];
+            
+            c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                <div class="flex justify-between mb-6">
+                    <h3 class="text-2xl font-bold">Attendance (CSE-A)</h3>
+                    <span class="text-green-400">Today</span>
+                </div>
+                <div class="space-y-2 mb-6" id="attendanceList">
+                    ${students.map((student, i) => `
+                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/5">
+                            <span class="font-bold">${student}</span>
+                            <div class="flex gap-2" id="btns-${i}">
+                                <button class="px-4 py-1 bg-green-500/20 text-green-400 rounded hover:bg-green-500 hover:text-black" 
+                                        onclick="markAttendance('${student}', 'present', ${i})">P</button>
+                                <button class="px-4 py-1 bg-red-500/20 text-red-400 rounded hover:bg-red-500 hover:text-black" 
+                                        onclick="markAttendance('${student}', 'absent', ${i})">A</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="w-full bg-purple-500 text-white font-bold py-3 rounded-xl" 
+                        onclick="saveAttendanceRecord()">
+                    Save Record
+                </button>
+            </div>`;
+        }
+
+        const attendanceRecord = {};
+
+        function markAttendance(student, status, index) {
+            attendanceRecord[student] = status;
+            document.getElementById(`btns-${index}`).innerHTML = status === 'present' ? '✅' : '❌';
+            playSound('click');
+        }
+
+        async function saveAttendanceRecord() {
+            if (Object.keys(attendanceRecord).length === 0) {
+                alert('Please mark attendance for at least one student');
+                return;
+            }
+
+            const success = await saveData('attendance/CSE-A/' + new Date().toISOString().split('T')[0], attendanceRecord);
+            if (success) {
+                triggerAction('Attendance Saved Successfully! ✅');
+                Object.keys(attendanceRecord).forEach(key => delete attendanceRecord[key]);
+            }
+        }
+
+        async function uploadMarks() {
+            const subject = document.getElementById('subjectCode').value;
+            const roll = document.getElementById('studentRoll').value;
+            const marks = document.getElementById('marksObtained').value;
+
+            if (!subject || !roll || !marks) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            const success = await saveData(`students/${roll}/marks/${subject}`, parseInt(marks));
+            if (success) {
+                document.getElementById('subjectCode').value = '';
+                document.getElementById('studentRoll').value = '';
+                document.getElementById('marksObtained').value = '';
+                triggerAction('Marks Uploaded Successfully! 📊');
+            }
+        }
+
+        async function postNotice() {
+            const text = document.getElementById('noticeText').value;
+            if (!text.trim()) {
+                alert('Please type a notice');
+                return;
+            }
+
+            const success = await saveData('notices/' + Date.now(), {
+                text: text,
+                timestamp: new Date().toISOString(),
+                author: 'Teacher'
+            });
+
+            if (success) {
+                document.getElementById('noticeText').value = '';
+                triggerAction('Notice Broadcasted! 📢');
+            }
+        }
+
+        // ==================== MESS VIEWS ====================
+        function renderMess(view) {
+            playSound('click');
+            const c = document.getElementById('contentArea');
+            setViewTitle("Mess " + view.charAt(0).toUpperCase() + view.slice(1));
+
+            if (view === 'dashboard') {
+                loadMessDashboard();
+            } else if (view === 'inventory') {
+                loadInventory();
+            } else if (view === 'menu') {
+                loadMenuEditor();
+            }
+        }
+
+        async function loadMessDashboard() {
+            const c = document.getElementById('contentArea');
+            const data = await getData('mess/dashboard') || {
+                mealsServed: 450,
+                feedback: 4.5
+            };
+
+            c.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in">
+                <div class="glass-panel p-6 border-l-4 border-green-500">
+                    <h3 class="text-lg font-bold">Meals Served</h3>
+                    <p class="text-4xl font-black mt-2">${data.mealsServed}</p>
+                    <p class="text-sm text-gray-400">Lunch Session</p>
+                </div>
+                <div class="glass-panel p-6 border-l-4 border-red-500">
+                    <h3 class="text-lg font-bold">Low Stock</h3>
+                    <p class="text-xl font-bold mt-2 text-red-400">Rice & Oil</p>
+                    <button class="mt-2 text-xs bg-red-500/20 px-2 py-1 rounded text-red-400" 
+                            onclick="renderMess('inventory')">Check</button>
+                </div>
+                <div class="glass-panel p-6">
+                    <h3 class="text-lg font-bold">Feedback</h3>
+                    <p class="text-3xl font-black mt-2">${data.feedback}/5</p>
+                    <p class="text-sm text-gray-400">Avg Rating</p>
+                </div>
+            </div>`;
+        }
+
+        async function loadInventory() {
+            const c = document.getElementById('contentArea');
+            c.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+
+            listenToData('mess/inventory', (inventory) => {
+                const data = inventory || {
+                    rice: 20,
+                    flour: 45,
+                    oil: 80
+                };
+
+                c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                    <h3 class="text-2xl font-bold mb-6">Inventory Status</h3>
+                    <div class="space-y-4">
+                        ${Object.entries(data).map(([item, percent]) => `
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="capitalize">${item}</span>
+                                    <span class="${percent < 30 ? 'text-red-400' : percent < 50 ? 'text-yellow-400' : 'text-green-400'}">
+                                        ${percent}% ${percent < 30 ? '(Low)' : ''}
+                                    </span>
+                                </div>
+                                <div class="w-full bg-white/10 h-2 rounded-full">
+                                    <div class="${percent < 30 ? 'bg-red-500' : percent < 50 ? 'bg-yellow-500' : 'bg-green-500'} h-full" 
+                                         style="width: ${percent}%"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="w-full mt-8 bg-orange-500 text-black font-bold py-3 rounded-xl hover:bg-orange-600" 
+                            onclick="orderRestock()">
+                        Order Restock
+                    </button>
+                </div>`;
+            });
+        }
+
+        async function orderRestock() {
+            const success = await saveData('mess/restockOrders/' + Date.now(), {
+                timestamp: new Date().toISOString(),
+                items: ['rice', 'oil']
+            });
+            if (success) {
+                triggerAction('Restock Order Sent! 🚛');
+            }
+        }
+
+        async function loadMenuEditor() {
+            const c = document.getElementById('contentArea');
+            c.innerHTML = '<div class="loading-spinner mx-auto"></div>';
+
+            const menu = await getData('mess/menu') || {
+                breakfast: 'Aloo Paratha',
+                lunch: 'Rajma Chawal',
+                dinner: 'Paneer Butter Masala'
+            };
+
+            c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                <h3 class="text-2xl font-bold mb-6">Update Menu</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs text-gray-400">Breakfast</label>
+                        <input type="text" id="breakfast" class="glass-input mt-1" value="${menu.breakfast}">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Lunch</label>
+                        <input type="text" id="lunch" class="glass-input mt-1" value="${menu.lunch}">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400">Dinner</label>
+                        <input type="text" id="dinner" class="glass-input mt-1" value="${menu.dinner}">
+                    </div>
+                    <button class="w-full bg-green-500 text-black font-bold py-3 rounded-xl" 
+                            onclick="publishMenu()">
+                        Publish Changes
+                    </button>
+                </div>
+            </div>`;
+        }
+
+        async function publishMenu() {
+            const menu = {
+                breakfast: document.getElementById('breakfast').value,
+                lunch: document.getElementById('lunch').value,
+                dinner: document.getElementById('dinner').value
+            };
+
+            const success = await updateData('mess/menu', menu);
+            if (success) {
+                triggerAction('Menu Published! ✅ Students will see updates instantly.');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -376,6 +376,15 @@
             50% { transform: translateY(-10px); opacity: 1; }
         }
 
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
         @media (max-width: 640px) {
             .chat-container {
                 width: calc(100vw - 40px);
@@ -671,6 +680,7 @@
 
         .modal-overlay.active {
             display: flex;
+            animation: overlayFadeIn 180ms ease-out;
         }
 
         .modal-content {
@@ -682,6 +692,19 @@
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
+            transform: translateY(8px) scale(0.98);
+            opacity: 0;
+            transition: transform 220ms cubic-bezier(.2,.9,.2,1), opacity 220ms ease-out;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        @keyframes overlayFadeIn {
+            from { background: rgba(0,0,0,0); }
+            to { background: rgba(0,0,0,0.7); }
         }
 
         .modal-header {
@@ -766,11 +789,281 @@
 </head>
 <body>
 
+    <!-- LOGIN & REGISTER PAGE -->
+    <div id="authLayer" class="fixed inset-0 z-[10000] bg-black flex items-center justify-center">
+        <style>
+            .auth-container {
+                background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+                border: 1px solid rgba(29, 185, 84, 0.3);
+                border-radius: 1.5rem;
+                backdrop-filter: blur(20px);
+                padding: 2.5rem;
+                max-width: 450px;
+                width: 90%;
+                animation: slideInUp 0.6s ease-out;
+            }
+
+            @keyframes slideInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .auth-logo {
+                font-size: 2.5rem;
+                font-weight: 900;
+                text-align: center;
+                margin-bottom: 0.5rem;
+                color: white;
+            }
+
+            .auth-subtitle {
+                text-align: center;
+                font-size: 0.875rem;
+                color: #1DB954;
+                letter-spacing: 2px;
+                margin-bottom: 2rem;
+                text-transform: uppercase;
+            }
+
+            .auth-form-group {
+                margin-bottom: 1rem;
+            }
+
+            .auth-label {
+                display: block;
+                font-size: 0.75rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+                text-transform: uppercase;
+                color: #aaa;
+            }
+
+            .auth-input {
+                width: 100%;
+                padding: 0.75rem;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 0.5rem;
+                color: white;
+                font-family: inherit;
+                font-size: 0.875rem;
+                transition: all 0.2s;
+            }
+
+            .auth-input:focus {
+                outline: none;
+                border-color: #1DB954;
+                background: rgba(29, 185, 84, 0.1);
+            }
+
+            .auth-select {
+                width: 100%;
+                padding: 0.75rem;
+                background: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 0.5rem;
+                color: white;
+                font-family: inherit;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+
+            .auth-select:focus {
+                outline: none;
+                border-color: #1DB954;
+                background: rgba(29, 185, 84, 0.1);
+            }
+
+            .auth-select option {
+                background-color: #1a1a1f;
+                color: white;
+            }
+
+            .auth-role-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .auth-role-option {
+                padding: 1rem;
+                background: rgba(255, 255, 255, 0.05);
+                border: 2px solid rgba(255, 255, 255, 0.1);
+                border-radius: 0.5rem;
+                cursor: pointer;
+                text-align: center;
+                transition: all 0.3s;
+                font-size: 0.875rem;
+                font-weight: 600;
+            }
+
+            .auth-role-option:hover {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(29, 185, 84, 0.3);
+            }
+
+            .auth-role-option.selected {
+                background: rgba(29, 185, 84, 0.2);
+                border-color: #1DB954;
+                color: #1DB954;
+            }
+
+            .auth-button {
+                width: 100%;
+                padding: 0.75rem;
+                background: linear-gradient(135deg, #1DB954, #10b981);
+                border: none;
+                border-radius: 0.5rem;
+                color: black;
+                font-weight: 700;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: all 0.3s;
+                margin-bottom: 0.75rem;
+            }
+
+            .auth-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(29, 185, 84, 0.3);
+            }
+
+            .auth-button:active {
+                transform: translateY(0);
+            }
+
+            .auth-toggle {
+                text-align: center;
+                font-size: 0.875rem;
+                color: #888;
+            }
+
+            .auth-toggle button {
+                background: none;
+                border: none;
+                color: #1DB954;
+                cursor: pointer;
+                font-weight: 600;
+                text-decoration: underline;
+            }
+
+            .auth-toggle button:hover {
+                color: #10b981;
+            }
+
+            .auth-error {
+                background: rgba(239, 68, 68, 0.1);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+                color: #ef4444;
+                padding: 0.75rem;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+                margin-bottom: 1rem;
+                display: none;
+            }
+
+            .auth-success {
+                background: rgba(34, 197, 94, 0.1);
+                border: 1px solid rgba(34, 197, 94, 0.3);
+                color: #22c55e;
+                padding: 0.75rem;
+                border-radius: 0.5rem;
+                font-size: 0.875rem;
+                margin-bottom: 1rem;
+                display: none;
+            }
+
+            .hidden-form {
+                display: none;
+            }
+        </style>
+
+        <div class="auth-container">
+            <div class="auth-logo">NEXUS</div>
+            <p class="auth-subtitle">Campus OS</p>
+
+            <!-- ERROR MESSAGE -->
+            <div id="authError" class="auth-error"></div>
+            <div id="authSuccess" class="auth-success"></div>
+
+            <!-- LOGIN FORM -->
+            <div id="loginForm">
+                <h2 style="color: white; margin-bottom: 1.5rem; font-size: 1.5rem; text-align: center;">Welcome Back</h2>
+                <div class="auth-form-group">
+                    <label class="auth-label">Email Address</label>
+                    <input type="email" class="auth-input" id="loginEmail" placeholder="your@email.com">
+                </div>
+                <div class="auth-form-group">
+                    <label class="auth-label">Password</label>
+                    <input type="password" class="auth-input" id="loginPassword" placeholder="••••••••">
+                </div>
+                <button class="auth-button" onclick="handleLogin()">Sign In</button>
+                <div class="auth-toggle">
+                    Don't have an account? <button onclick="switchAuthMode('register')">Register here</button>
+                </div>
+            </div>
+
+            <!-- REGISTER FORM -->
+            <div id="registerForm" class="hidden-form">
+                <h2 style="color: white; margin-bottom: 1.5rem; font-size: 1.5rem; text-align: center;">Create Account</h2>
+                <div class="auth-form-group">
+                    <label class="auth-label">Full Name</label>
+                    <input type="text" class="auth-input" id="registerName" placeholder="Your Name">
+                </div>
+                <div class="auth-form-group">
+                    <label class="auth-label">Email Address</label>
+                    <input type="email" class="auth-input" id="registerEmail" placeholder="your@email.com">
+                </div>
+                <div class="auth-form-group">
+                    <label class="auth-label">Password</label>
+                    <input type="password" class="auth-input" id="registerPassword" placeholder="••••••••">
+                </div>
+                <div class="auth-form-group">
+                    <label class="auth-label">Confirm Password</label>
+                    <input type="password" class="auth-input" id="registerConfirmPassword" placeholder="••••••••">
+                </div>
+                <div class="auth-form-group">
+                    <label class="auth-label">Select Your Role</label>
+                    <div class="auth-role-grid">
+                        <div class="auth-role-option" onclick="selectRole('student')">
+                            👨‍🎓 Student
+                        </div>
+                        <div class="auth-role-option" onclick="selectRole('teacher')">
+                            👩‍🏫 Teacher
+                        </div>
+                        <div class="auth-role-option" onclick="selectRole('mess')">
+                            🍽️ Mess Staff
+                        </div>
+                        <div class="auth-role-option" onclick="selectRole('admin')">
+                            🛡️ Admin
+                        </div>
+                    </div>
+                </div>
+                <button class="auth-button" onclick="handleRegister()">Create Account</button>
+                <div class="auth-toggle">
+                    Already have an account? <button onclick="switchAuthMode('login')">Sign in here</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- INTRO SCREEN -->
     <div id="intro-layer">
         <div class="intro-aura"></div>
         <h1 class="intro-logo">NEXUS</h1>
         <p class="intro-sub">CAMPUS OS</p>
+        <!-- Intro Music - Jazz & Futuristic -->
+        <audio id="introMusic" preload="auto">
+            <source src="https://assets.mixkit.co/active_storage/music/7018/7018-preview.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+        </audio>
     </div>
 
     <!-- AI CHAT BOT -->
@@ -817,26 +1110,40 @@
                     <option value="student">👨‍🎓 Student</option>
                     <option value="teacher">👩‍🏫 Teacher</option>
                     <option value="mess">🍽️ Mess Staff</option>
+                    <option value="admin">🛡️ Admin</option>
                 </select>
             </div>
 
             <nav id="navMenu" class="flex-1 py-4"></nav>
 
             <div class="p-4 border-t border-white/5">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full"></div>
-                    <div>
-                        <p class="font-bold text-sm" id="userName">User</p>
-                        <p class="text-xs text-gray-500">Online</p>
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full"></div>
+                        <div>
+                            <p class="font-bold text-sm" id="userName">User</p>
+                            <p class="text-xs text-gray-500">Online</p>
+                        </div>
                     </div>
                 </div>
+                <button onclick="logout()" class="w-full text-xs bg-red-500/20 border border-red-500/50 text-red-400 py-2 rounded hover:bg-red-500/30 transition">
+                    🚪 Logout
+                </button>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col overflow-hidden">
             <header class="p-6 border-b border-white/5 backdrop-blur-xl bg-black/20">
-                <h2 id="viewTitle" class="text-3xl font-black">Dashboard</h2>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                    <h2 id="viewTitle" class="text-3xl font-black">Dashboard</h2>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div id="adminBell" style="position:relative; cursor:pointer; display:flex; align-items:center; gap:8px; color:#fff;" title="Admin Reports" onclick="openAdminPanelModal(event)">
+                            <i class="fa-solid fa-bell" style="font-size:18px;"></i>
+                            <span id="adminBellBadge" style="position:absolute; top:-6px; right:-6px; background:#ff4d4f; color:#fff; font-size:11px; padding:2px 6px; border-radius:999px; display:none;">0</span>
+                        </div>
+                    </div>
+                </div>
             </header>
             
             <div id="contentArea" class="flex-1 overflow-y-auto p-8">
@@ -1038,6 +1345,201 @@
             }
         }
 
+        // ==================== AUTHENTICATION ====================
+        let selectedRole = null;
+
+        function switchAuthMode(mode) {
+            playSound('click');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const errorDiv = document.getElementById('authError');
+            const successDiv = document.getElementById('authSuccess');
+            
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+            selectedRole = null;
+            
+            if (mode === 'register') {
+                loginForm.classList.add('hidden-form');
+                registerForm.classList.remove('hidden-form');
+                document.getElementById('registerName').value = '';
+                document.getElementById('registerEmail').value = '';
+                document.getElementById('registerPassword').value = '';
+                document.getElementById('registerConfirmPassword').value = '';
+                
+                // Deselect all role options
+                document.querySelectorAll('.auth-role-option').forEach(el => {
+                    el.classList.remove('selected');
+                });
+            } else {
+                registerForm.classList.add('hidden-form');
+                loginForm.classList.remove('hidden-form');
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+            }
+        }
+
+        function selectRole(role) {
+            playSound('click');
+            selectedRole = role;
+            document.querySelectorAll('.auth-role-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.target.closest('.auth-role-option').classList.add('selected');
+        }
+
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            playSound('notification');
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 4000);
+        }
+
+        function showAuthSuccess(message) {
+            const successDiv = document.getElementById('authSuccess');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            playSound('success');
+        }
+
+        function handleLogin() {
+            playSound('click');
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorDiv = document.getElementById('authError');
+            
+            errorDiv.style.display = 'none';
+
+            if (!email || !password) {
+                showAuthError('Please enter email and password');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showAuthError('Please enter a valid email address');
+                return;
+            }
+
+            // Simulate login - in production, this would connect to backend
+            const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (!user) {
+                showAuthError('Invalid email or password. Demo: Use any email/password');
+                // For demo purposes, allow login with any credentials
+                const demoUser = {
+                    email: email,
+                    name: email.split('@')[0],
+                    role: 'student',
+                    id: 'demo_' + Date.now()
+                };
+                completeLogin(demoUser);
+                return;
+            }
+
+            completeLogin(user);
+        }
+
+        function handleRegister() {
+            playSound('click');
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value.trim();
+            const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
+
+            if (!name || !email || !password || !confirmPassword) {
+                showAuthError('Please fill all fields');
+                return;
+            }
+
+            if (!email.includes('@')) {
+                showAuthError('Please enter a valid email address');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAuthError('Password must be at least 6 characters');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAuthError('Passwords do not match');
+                return;
+            }
+
+            if (!selectedRole) {
+                showAuthError('Please select a role');
+                return;
+            }
+
+            // Check if user already exists
+            const users = JSON.parse(localStorage.getItem('nexusUsers') || '[]');
+            if (users.find(u => u.email === email)) {
+                showAuthError('This email is already registered');
+                return;
+            }
+
+            // Create new user
+            const newUser = {
+                id: 'user_' + Date.now(),
+                name: name,
+                email: email,
+                password: password,
+                role: selectedRole,
+                createdAt: new Date().toISOString()
+            };
+
+            users.push(newUser);
+            localStorage.setItem('nexusUsers', JSON.stringify(users));
+
+            showAuthSuccess('Account created successfully! Logging in...');
+            setTimeout(() => {
+                completeLogin(newUser);
+            }, 1500);
+        }
+
+        function completeLogin(user) {
+            // Store user session
+            localStorage.setItem('currentUser', JSON.stringify(user));
+            localStorage.setItem('userRole', user.role);
+
+            // Update global variables
+            currentRole = user.role;
+
+            // Hide auth layer
+            const authLayer = document.getElementById('authLayer');
+            authLayer.style.animation = 'fadeOut 0.5s ease-out forwards';
+            
+            // Show intro and start animation
+            setTimeout(() => {
+                authLayer.style.display = 'none';
+                const introLayer = document.getElementById('intro-layer');
+                introLayer.style.display = 'flex';
+                startIntroAnimation();
+            }, 500);
+        }
+
+        function logout() {
+            playSound('click');
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('userRole');
+                location.reload();
+            }
+        }
+
+        // Check if user is already logged in
+        function checkAuthStatus() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                completeLogin(user);
+            }
+        }
+
         // ==================== AI CHAT BOT ====================
         const aiKnowledgeBase = {
             student: {
@@ -1072,6 +1574,15 @@
                 'dashboard': 'The Mess Dashboard shows meals served, customer feedback, inventory status, and peak serving hours.',
                 'feedback': 'Monitor student meal feedback. Low scores indicate need to improve meal quality or variety.',
                 'default': 'I can help with inventory, menu updates, restock orders, and feedback monitoring. How can I assist?'
+            },
+            admin: {
+                'reports': 'View all anti-ragging and waste/hazard reports from students in the Reports & Complaints section. Approve, reject, or forward reports as needed.',
+                'complaints': 'Manage student complaints and reports. Each report has options to approve, reject, or escalate to higher authorities.',
+                'users': 'Manage all users on the platform including students, teachers, and staff. Edit or remove user accounts as needed.',
+                'announcements': 'Post campus-wide announcements in the Announcements section. Target specific groups or send to all users.',
+                'analytics': 'View campus analytics including student count, attendance rates, reports filed, and system uptime statistics.',
+                'settings': 'Access admin settings for system maintenance, user role management, and activity logs.',
+                'default': 'I can help with viewing reports, managing users, posting announcements, viewing analytics, and system settings. What do you need?'
             }
         };
 
@@ -1160,7 +1671,8 @@
                 const roleResponses = {
                     student: 'I can assist with attendance, academics, mess menu, clubs, transport, sustainability, and reporting. What would you like to know?',
                     teacher: 'I can help with attendance, marks, notices, and class management. What do you need?',
-                    mess: 'I can help with inventory, menu updates, restocking, and feedback monitoring. How can I assist?'
+                    mess: 'I can help with inventory, menu updates, restocking, and feedback monitoring. How can I assist?',
+                    admin: 'I can assist with viewing reports, managing users, posting announcements, viewing analytics, and system administration. How can I help?'
                 };
                 response = roleResponses[role] || knowledge['default'];
             }
@@ -1289,21 +1801,175 @@
             }
         }
 
+        // Make buttons interactive: attach lightweight handlers to any button missing a handler
+        function registerGenericButtonHandlers() {
+            document.querySelectorAll('button').forEach(btn => {
+                const hasOnclickAttr = btn.getAttribute('onclick');
+                const alreadyMarked = btn.dataset._interactiveApplied;
+                if (!hasOnclickAttr && !alreadyMarked) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const label = (btn.innerText || btn.textContent || 'Action').trim();
+                        playSound('click');
+                        triggerAction(`${label} — simulated action (demo)`);
+                    });
+                    btn.dataset._interactiveApplied = '1';
+                }
+            });
+        }
+
+        // Admin notifications: check for admin/notifications or mockData and update bell badge
+        function checkAdminNotifications() {
+            try {
+                const stored = JSON.parse(localStorage.getItem('admin/notifications') || 'null');
+                const remote = mockData['admin/notifications'] || null;
+                const n = stored || remote || null;
+                const badge = document.getElementById('adminBellBadge');
+                if (!badge) return;
+
+                if (n && n.newReport) {
+                    badge.style.display = 'inline-block';
+                    badge.textContent = 'NEW';
+                } else {
+                    badge.style.display = 'none';
+                }
+            } catch (e) {
+                console.error('Admin notify check failed', e);
+            }
+        }
+
+        function openAdminPanelModal(e) {
+            e?.stopPropagation();
+            playSound('click');
+            const overlay = document.getElementById('postModal') || createModal();
+            const reports = mockData['admin/reports'] || [];
+
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span>🛡️ Admin Reports</span>
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                    </div>
+                    <div style="max-height:60vh; overflow:auto; padding:8px;">
+                        ${reports.length === 0 ? '<div class="glass-panel p-6 text-center">No reports</div>' : reports.slice(0,8).map(r => `
+                            <div class="glass-panel p-4 mb-3">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <div style="font-weight:700">${r.type?.toUpperCase() || 'REPORT'}</div>
+                                    <div style="font-size:12px; color:#999">${new Date(r.timestamp).toLocaleString()}</div>
+                                </div>
+                                <div style="margin-top:8px; color:#ddd">${r.description || ''}</div>
+                                <div style="margin-top:8px; display:flex; gap:8px;">
+                                    <button class="px-3 py-1 bg-green-500/20 text-green-400 rounded text-xs" onclick="triggerAction('Marked as reviewed (demo)')">Mark Reviewed</button>
+                                    <button class="px-3 py-1 bg-blue-500/20 text-blue-400 rounded text-xs" onclick="(function(){switchToAdminView()})()">Open Admin Panel</button>
+                                </div>
+                            </div>`).join('')}
+                    </div>
+                </div>
+            `;
+
+            overlay.classList.add('active');
+        }
+
+        function switchToAdminView() {
+            // Switch to admin role and open reports view
+            playSound('whoosh');
+            currentRole = 'admin';
+            localStorage.setItem('userRole', 'admin');
+            switchRole('admin');
+            navigate('reports');
+            closeModal();
+        }
+
+        // Open forum post cards (they aren't clickable by default)
+        document.addEventListener('click', function (e) {
+            const card = e.target.closest && e.target.closest('.post-card');
+            if (!card) return;
+            e.stopPropagation();
+            playSound('click');
+            const author = card.querySelector('.post-author')?.textContent || 'User';
+            const time = card.querySelector('.post-time')?.textContent || '';
+            const title = card.querySelector('h4')?.textContent || card.querySelector('.post-title')?.textContent || 'Discussion';
+            const content = card.querySelector('.post-content')?.textContent || '';
+
+            const overlay = document.getElementById('postModal') || createModal();
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span>💬 ${title}</span>
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                    </div>
+                    <div style="padding:12px; max-height:60vh; overflow:auto;">
+                        <div style="font-size:12px; color:#888; margin-bottom:8px;">By ${author} • ${time}</div>
+                        <div style="line-height:1.6;">${content}</div>
+                    </div>
+                </div>
+            `;
+            overlay.classList.add('active');
+        });
+
         // ==================== INTRO ANIMATION ====================
         window.addEventListener('load', () => {
+            // Check if user is already logged in
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                // User is logged in, skip auth and go to intro
+                const user = JSON.parse(currentUser);
+                currentRole = user.role;
+                document.getElementById('authLayer').style.display = 'none';
+                document.getElementById('intro-layer').style.display = 'flex';
+                startIntroAnimation();
+            } else {
+                // User not logged in, show auth layer
+                document.getElementById('intro-layer').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('authLayer').style.display = 'flex';
+            }
+        });
+
+        function startIntroAnimation() {
             setWelcomeMessageTime();
             loadChatHistory();
             playSound('whoosh');
+            
+            // Play intro music
+            const introMusic = document.getElementById('introMusic');
+            if (introMusic) {
+                introMusic.play().catch(err => console.log('Audio play failed:', err));
+            }
+            
             setTimeout(() => {
                 playSound('success');
             }, 2000);
             setTimeout(() => {
+                // Fade out intro music
+                if (introMusic && introMusic.played.length > 0) {
+                    introMusic.pause();
+                }
                 document.getElementById('intro-layer').style.opacity = '0';
                 document.getElementById('intro-layer').style.visibility = 'hidden';
                 document.getElementById('mainApp').style.display = 'flex';
-                switchRole('student');
+                
+                // Load the user's dashboard
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+                document.getElementById('userName').textContent = currentUser.name || 'User';
+                document.getElementById('roleSelector').value = currentUser.role || 'student';
+
+                // make sure generic buttons are interactive in demo
+                registerGenericButtonHandlers();
+                // check admin notifications after UI loads
+                setTimeout(checkAdminNotifications, 200);
+                // re-check periodically while app is open
+                setInterval(checkAdminNotifications, 4000);
+                switchRole(currentUser.role || 'student');
             }, 3500);
-        });
+        }
+
+        function loadInitialDashboard() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            document.getElementById('userName').textContent = currentUser.name || 'User';
+            document.getElementById('roleSelector').value = currentUser.role || 'student';
+            switchRole(currentUser.role || 'student');
+        }
 
         // ==================== ROLE SWITCHING ====================
         function switchRole(role) {
@@ -1336,6 +2002,14 @@
                     {icon: 'fa-home', label: 'Dashboard', view: 'dashboard'},
                     {icon: 'fa-warehouse', label: 'Inventory', view: 'inventory'},
                     {icon: 'fa-book-open', label: 'Menu', view: 'menu'}
+                ],
+                admin: [
+                    {icon: 'fa-home', label: 'Dashboard', view: 'dashboard'},
+                    {icon: 'fa-flag', label: 'Reports & Complaints', view: 'reports'},
+                    {icon: 'fa-users', label: 'Manage Users', view: 'users'},
+                    {icon: 'fa-bell', label: 'Announcements', view: 'announcements'},
+                    {icon: 'fa-chart-bar', label: 'Analytics', view: 'analytics'},
+                    {icon: 'fa-cogs', label: 'Settings', view: 'settings'}
                 ]
             };
 
@@ -1362,6 +2036,7 @@
             if (currentRole === 'student') renderStudent(view);
             else if (currentRole === 'teacher') renderTeacher(view);
             else if (currentRole === 'mess') renderMess(view);
+            else if (currentRole === 'admin') renderAdmin(view);
         }
 
         // ==================== STUDENT VIEWS ====================
@@ -1393,8 +2068,14 @@
                             <p class="text-xs text-gray-400">Speed: 45 km/h • ETA: 5 mins</p>
                         </div>
                     </div>
-                    <div id="transportList" class="space-y-4">
-                        <div class="loading-spinner mx-auto"></div>
+                    <div class="space-y-4">
+                        <div id="transportList" class="space-y-4">
+                            <div class="loading-spinner mx-auto"></div>
+                        </div>
+                        <button class="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold py-4 rounded-xl text-lg hover:shadow-lg transition" 
+                                onclick="window.open('https://www.rapido.app', '_blank')">
+                            <i class="fa-solid fa-taxi mr-2"></i> Open Rapido
+                        </button>
                     </div>
                 </div>`;
                 loadTransportData();
@@ -1662,17 +2343,67 @@
 
         function openNewsDetail(id) {
             playSound('click');
-            triggerAction('Opening full news article...');
+            const overlay = document.getElementById('postModal') || createModal();
+            const news = mockData['news'] || [];
+            const item = news.find(n => n.id === id) || { id, date: new Date().toDateString(), icon: '📰', title: 'News Item', excerpt: 'Full article content not available in demo.' };
+
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span>${item.icon} ${item.title}</span>
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                    </div>
+                    <div style="padding:12px; max-height:60vh; overflow:auto;">
+                        <div style="font-size:12px; color:#888; margin-bottom:8px;">${item.date}</div>
+                        <div style="line-height:1.6;">${item.excerpt || item.content || 'This is a demo article. Replace with real content when backend is available.'}</div>
+                    </div>
+                </div>
+            `;
+            overlay.classList.add('active');
         }
 
         function openBlogDetail(id) {
             playSound('click');
-            triggerAction('Opening full blog post...');
+            const overlay = document.getElementById('postModal') || createModal();
+            const blogs = mockData['blogs'] || [];
+            const blog = blogs.find(b => b.id === id) || { id, author: 'Demo', date: new Date().toDateString(), title: 'Blog Post', content: 'Full blog content not available in demo.' };
+
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span>✍️ ${blog.title}</span>
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                    </div>
+                    <div style="padding:12px; max-height:60vh; overflow:auto;">
+                        <div style="font-size:12px; color:#888; margin-bottom:8px;">By ${blog.author} • ${blog.date} • ${blog.tag || ''}</div>
+                        <div style="line-height:1.6;">${blog.content || 'This is demo content for the blog post.'}</div>
+                        <div style="margin-top:12px; font-size:12px; color:#888;">👍 ${blog.likes || 0} Likes</div>
+                    </div>
+                </div>
+            `;
+            overlay.classList.add('active');
         }
 
         function openCreativeDetail(id) {
             playSound('click');
-            triggerAction('Opening creative content...');
+            const overlay = document.getElementById('postModal') || createModal();
+            const creative = mockData['creative'] || [];
+            const item = creative.find(c => c.id === id) || { id, creator: 'Demo', type: '🎬', title: 'Creative Item', category: 'Demo', likes: 0 };
+
+            overlay.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <span>${item.type} ${item.title}</span>
+                        <button class="modal-close" onclick="closeModal()">✕</button>
+                    </div>
+                    <div style="padding:12px; max-height:60vh; overflow:auto;">
+                        <div style="font-size:12px; color:#888; margin-bottom:8px;">By ${item.creator} • ${item.category || ''}</div>
+                        <div style="line-height:1.6;">This is a demo preview for the creative content. Replace with embedded media in production.</div>
+                        <div style="margin-top:12px; font-size:12px; color:#888;">❤️ ${item.likes || 0} Likes</div>
+                    </div>
+                </div>
+            `;
+            overlay.classList.add('active');
         }
 
         // Load Dashboard Data from Firebase
@@ -1877,6 +2608,10 @@
             const c = document.getElementById('contentArea');
             c.innerHTML = '<div class="loading-spinner mx-auto"></div>';
             
+            // Get today's meal preferences
+            const today = new Date().toISOString().split('T')[0];
+            const mealPreferences = JSON.parse(localStorage.getItem(`mealPreferences_${today}`) || '{}');
+            
             // Listen for real-time updates
             listenToData('mess/menu', (menu) => {
                 const data = menu || {
@@ -1888,7 +2623,10 @@
 
                 c.innerHTML = `<div class="space-y-6 fade-in">
                     <div class="glass-panel p-6 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30">
-                        <p class="text-sm">🍽️ Today's meals are prepared fresh. Ratings: ⭐⭐⭐⭐ (4.5/5)</p>
+                        <div class="flex justify-between items-center">
+                            <p class="text-sm">🍽️ Today's meals are prepared fresh. Ratings: ⭐⭐⭐⭐ (4.5/5)</p>
+                            <button onclick="viewMealSummary()" class="text-xs bg-orange-500/40 text-orange-300 px-3 py-1 rounded hover:bg-orange-500/60 transition font-bold">📊 Your Preferences</button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="glass-panel p-8 border-t-4 border-yellow-400 hover:bg-white/5 transition">
@@ -1896,10 +2634,15 @@
                                 <h3 class="text-xl font-bold">🌅 Breakfast</h3>
                                 <span class="text-xs bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full">6:30 AM</span>
                             </div>
-                            <p class="text-2xl font-black mb-3">${data.breakfast}</p>
+                            <p class="text-2xl font-black mb-4">${data.breakfast}</p>
+                            ${mealPreferences.breakfast ? `<div class="mb-3 p-2 bg-${mealPreferences.breakfast === 'eating' ? 'green' : 'red'}-500/20 rounded border border-${mealPreferences.breakfast === 'eating' ? 'green' : 'red'}-500/50 text-xs font-bold text-${mealPreferences.breakfast === 'eating' ? 'green' : 'red'}-400">${mealPreferences.breakfast === 'eating' ? '✅ You\'re eating this' : '❌ You\'re skipping this'}</div>` : ''}
+                            <div class="flex gap-2 mb-3">
+                                <button onclick="markMealStatus('breakfast', 'eating')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold ${mealPreferences.breakfast === 'eating' ? 'ring-2 ring-green-500' : ''}">✅ Eating</button>
+                                <button onclick="markMealStatus('breakfast', 'skip')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold ${mealPreferences.breakfast === 'skip' ? 'ring-2 ring-red-500' : ''}">❌ Skip</button>
+                            </div>
                             <div class="flex gap-2">
-                                <button onclick="rateMeal('breakfast', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
-                                <button onclick="rateMeal('breakfast', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                                <button onclick="rateMeal('breakfast', 'thumbsup')" class="flex-1 bg-blue-500/20 text-blue-400 py-1 rounded text-xs hover:bg-blue-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('breakfast', 'thumbsdown')" class="flex-1 bg-orange-500/20 text-orange-400 py-1 rounded text-xs hover:bg-orange-500/40 transition font-bold">👎 Bad</button>
                             </div>
                         </div>
                         <div class="glass-panel p-8 border-t-4 border-orange-400 hover:bg-white/5 transition">
@@ -1907,10 +2650,15 @@
                                 <h3 class="text-xl font-bold">🍲 Lunch</h3>
                                 <span class="text-xs bg-orange-500/20 text-orange-300 px-3 py-1 rounded-full">12:30 PM</span>
                             </div>
-                            <p class="text-2xl font-black mb-3">${data.lunch}</p>
+                            <p class="text-2xl font-black mb-4">${data.lunch}</p>
+                            ${mealPreferences.lunch ? `<div class="mb-3 p-2 bg-${mealPreferences.lunch === 'eating' ? 'green' : 'red'}-500/20 rounded border border-${mealPreferences.lunch === 'eating' ? 'green' : 'red'}-500/50 text-xs font-bold text-${mealPreferences.lunch === 'eating' ? 'green' : 'red'}-400">${mealPreferences.lunch === 'eating' ? '✅ You\'re eating this' : '❌ You\'re skipping this'}</div>` : ''}
+                            <div class="flex gap-2 mb-3">
+                                <button onclick="markMealStatus('lunch', 'eating')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold ${mealPreferences.lunch === 'eating' ? 'ring-2 ring-green-500' : ''}">✅ Eating</button>
+                                <button onclick="markMealStatus('lunch', 'skip')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold ${mealPreferences.lunch === 'skip' ? 'ring-2 ring-red-500' : ''}">❌ Skip</button>
+                            </div>
                             <div class="flex gap-2">
-                                <button onclick="rateMeal('lunch', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
-                                <button onclick="rateMeal('lunch', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                                <button onclick="rateMeal('lunch', 'thumbsup')" class="flex-1 bg-blue-500/20 text-blue-400 py-1 rounded text-xs hover:bg-blue-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('lunch', 'thumbsdown')" class="flex-1 bg-orange-500/20 text-orange-400 py-1 rounded text-xs hover:bg-orange-500/40 transition font-bold">👎 Bad</button>
                             </div>
                         </div>
                         <div class="glass-panel p-8 border-t-4 border-purple-400 hover:bg-white/5 transition">
@@ -1918,10 +2666,15 @@
                                 <h3 class="text-xl font-bold">🍛 Dinner</h3>
                                 <span class="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">7:30 PM</span>
                             </div>
-                            <p class="text-2xl font-black mb-3">${data.dinner}</p>
+                            <p class="text-2xl font-black mb-4">${data.dinner}</p>
+                            ${mealPreferences.dinner ? `<div class="mb-3 p-2 bg-${mealPreferences.dinner === 'eating' ? 'green' : 'red'}-500/20 rounded border border-${mealPreferences.dinner === 'eating' ? 'green' : 'red'}-500/50 text-xs font-bold text-${mealPreferences.dinner === 'eating' ? 'green' : 'red'}-400">${mealPreferences.dinner === 'eating' ? '✅ You\'re eating this' : '❌ You\'re skipping this'}</div>` : ''}
+                           <div class="flex gap-2 mb-3">
+                                <button onclick="markMealStatus('dinner', 'eating')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold ${mealPreferences.dinner === 'eating' ? 'ring-2 ring-green-500' : ''}">✅ Eating</button>
+                                <button onclick="markMealStatus('dinner', 'skip')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold ${mealPreferences.dinner === 'skip' ? 'ring-2 ring-red-500' : ''}">❌ Skip</button>
+                            </div>
                             <div class="flex gap-2">
-                                <button onclick="rateMeal('dinner', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
-                                <button onclick="rateMeal('dinner', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                                <button onclick="rateMeal('dinner', 'thumbsup')" class="flex-1 bg-blue-500/20 text-blue-400 py-1 rounded text-xs hover:bg-blue-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('dinner', 'thumbsdown')" class="flex-1 bg-orange-500/20 text-orange-400 py-1 rounded text-xs hover:bg-orange-500/40 transition font-bold">👎 Bad</button>
                             </div>
                         </div>
                         <div class="glass-panel p-8 border-t-4 border-cyan-400 hover:bg-white/5 transition">
@@ -1929,15 +2682,58 @@
                                 <h3 class="text-xl font-bold">☕ Snacks</h3>
                                 <span class="text-xs bg-cyan-500/20 text-cyan-300 px-3 py-1 rounded-full">4:00 PM</span>
                             </div>
-                            <p class="text-2xl font-black mb-3">${data.snacks}</p>
+                            <p class="text-2xl font-black mb-4">${data.snacks}</p>
+                            ${mealPreferences.snacks ? `<div class="mb-3 p-2 bg-${mealPreferences.snacks === 'eating' ? 'green' : 'red'}-500/20 rounded border border-${mealPreferences.snacks === 'eating' ? 'green' : 'red'}-500/50 text-xs font-bold text-${mealPreferences.snacks === 'eating' ? 'green' : 'red'}-400">${mealPreferences.snacks === 'eating' ? '✅ You\'re eating this' : '❌ You\'re skipping this'}</div>` : ''}
+                            <div class="flex gap-2 mb-3">
+                                <button onclick="markMealStatus('snacks', 'eating')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold ${mealPreferences.snacks === 'eating' ? 'ring-2 ring-green-500' : ''}">✅ Eating</button>
+                                <button onclick="markMealStatus('snacks', 'skip')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold ${mealPreferences.snacks === 'skip' ? 'ring-2 ring-red-500' : ''}">❌ Skip</button>
+                            </div>
                             <div class="flex gap-2">
-                                <button onclick="rateMeal('snacks', 'thumbsup')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded text-sm hover:bg-green-500/40 transition font-bold">👍 Good</button>
-                                <button onclick="rateMeal('snacks', 'thumbsdown')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded text-sm hover:bg-red-500/40 transition font-bold">👎 Bad</button>
+                                <button onclick="rateMeal('snacks', 'thumbsup')" class="flex-1 bg-blue-500/20 text-blue-400 py-1 rounded text-xs hover:bg-blue-500/40 transition font-bold">👍 Good</button>
+                                <button onclick="rateMeal('snacks', 'thumbsdown')" class="flex-1 bg-orange-500/20 text-orange-400 py-1 rounded text-xs hover:bg-orange-500/40 transition font-bold">👎 Bad</button>
                             </div>
                         </div>
                     </div>
                 </div>`;
             });
+        }
+
+        function markMealStatus(mealType, status) {
+            (async () => {
+                playSound('click');
+                const today = new Date().toISOString().split('T')[0];
+                const mealPreferences = JSON.parse(localStorage.getItem(`mealPreferences_${today}`) || '{}');
+
+                mealPreferences[mealType] = status;
+                localStorage.setItem(`mealPreferences_${today}`, JSON.stringify(mealPreferences));
+
+                const statusText = status === 'eating' ? 'eating 🍽️' : 'skipping ❌';
+                triggerAction(`${mealType.charAt(0).toUpperCase() + mealType.slice(1)} preference saved: ${statusText}`);
+
+                // Save to database (student-specific)
+                await saveData(`students/student_001/mealPreferences/${today}/${mealType}`, {
+                    meal: mealType,
+                    status: status,
+                    timestamp: new Date().toISOString()
+                });
+
+                // Update mess dashboard fake counts so teacher/dashboard reflects change immediately
+                try {
+                    const dashboard = (await getData('mess/dashboard')) || { mealsServed: 0, feedback: 4.5, todayMeals: 0, peakHour: '12:30 PM' };
+                    // crude adjustment: eating increases today's meals by 1, skipping decreases
+                    if (status === 'eating') dashboard.todayMeals = (dashboard.todayMeals || 0) + 1;
+                    else dashboard.todayMeals = Math.max(0, (dashboard.todayMeals || 0) - 1);
+
+                    // Also update mockData so client-side views show change
+                    mockData['mess/dashboard'] = dashboard;
+                    await saveData('mess/dashboard', dashboard);
+                } catch (e) {
+                    console.error('Failed to update mess dashboard', e);
+                }
+
+                // Persist and refresh view
+                loadMessMenuData();
+            })();
         }
         
         function rateMeal(mealType, rating) {
@@ -1945,6 +2741,28 @@
             const emoji = rating === 'thumbsup' ? '👍' : '👎';
             triggerAction(`${emoji} Thanks for your feedback on ${mealType}!`);
             saveData(`mess/ratings/${mealType}/${Date.now()}`, {meal: mealType, rating: rating, timestamp: new Date().toISOString()});
+        }
+
+        function viewMealSummary() {
+            playSound('click');
+            const today = new Date().toISOString().split('T')[0];
+            const mealPreferences = JSON.parse(localStorage.getItem(`mealPreferences_${today}`) || '{}');
+            
+            const eatingMeals = Object.entries(mealPreferences)
+                .filter(([_, status]) => status === 'eating')
+                .map(([meal, _]) => meal.charAt(0).toUpperCase() + meal.slice(1))
+                .join(', ');
+            
+            const skippingMeals = Object.entries(mealPreferences)
+                .filter(([_, status]) => status === 'skip')
+                .map(([meal, _]) => meal.charAt(0).toUpperCase() + meal.slice(1))
+                .join(', ');
+            
+            let summary = '📋 Your Meal Preferences for Today\n\n';
+            summary += eatingMeals ? `✅ Eating: ${eatingMeals}\n` : '✅ Eating: None selected\n';
+            summary += skippingMeals ? `❌ Skipping: ${skippingMeals}` : '❌ Skipping: None selected';
+            
+            alert(summary);
         }
 
         // Load Transport Data
@@ -2112,11 +2930,25 @@
                 return;
             }
 
-            const success = await saveData('reports/' + type + '/' + Date.now(), {
+            const payload = {
                 description: text,
                 timestamp: new Date().toISOString(),
-                studentId: 'student_001'
-            });
+                studentId: 'student_001',
+                type: type
+            };
+
+            const success = await saveData('reports/' + type + '/' + Date.now(), payload);
+
+            // Also send a copy to admin inbox so admins can review reports
+            try {
+                await saveData('admin/reports/' + Date.now(), payload);
+                // update client-side mockData for admin view
+                mockData['admin/reports'] = mockData['admin/reports'] || [];
+                mockData['admin/reports'].unshift(payload);
+                await saveData('admin/notifications', { newReport: true, timestamp: new Date().toISOString() });
+            } catch (e) {
+                console.error('Failed to send report to admin', e);
+            }
 
             if (success) {
                 document.getElementById(textareaId).value = '';
@@ -2213,9 +3045,34 @@
                 return;
             }
 
-            const success = await saveData('attendance/CSE-A/' + new Date().toISOString().split('T')[0], attendanceRecord);
+            const dateKey = new Date().toISOString().split('T')[0];
+            const success = await saveData('attendance/CSE-A/' + dateKey, attendanceRecord);
             if (success) {
                 triggerAction('Attendance Saved Successfully! ✅');
+
+                // Update a student's overall attendance percentage in students/student_001/attendance
+                try {
+                    const presentCount = Object.values(attendanceRecord).filter(s => s === 'present').length;
+                    const total = Object.keys(attendanceRecord).length;
+                    const newPercent = Math.round((presentCount / total) * 100);
+
+                    const studentAttendance = (await getData('students/student_001/attendance')) || {};
+                    // If there are subjects, update the first subject, otherwise set an 'Overall' entry
+                    const subjects = Object.keys(studentAttendance);
+                    if (subjects.length > 0) {
+                        const subjectToUpdate = subjects[0];
+                        studentAttendance[subjectToUpdate] = newPercent;
+                    } else {
+                        studentAttendance['Overall'] = newPercent;
+                    }
+
+                    // Persist change so student view reflects update
+                    mockData['students/student_001/attendance'] = studentAttendance;
+                    await saveData('students/student_001/attendance', studentAttendance);
+                } catch (e) {
+                    console.error('Failed to update student attendance after saving record', e);
+                }
+
                 Object.keys(attendanceRecord).forEach(key => delete attendanceRecord[key]);
             }
         }
@@ -2327,6 +3184,53 @@
                         <p class="text-xs text-blue-400 mt-3">Peak: ${data.peakHour}</p>
                     </div>
                 </div>
+                
+                <div class="glass-panel p-6 border-t-4 border-cyan-500">
+                    <h3 class="text-lg font-bold mb-4">📋 Today's Meal Preferences</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="bg-green-500/10 p-4 rounded-lg border border-green-500/30">
+                            <p class="text-xs text-gray-400 mb-1">🍅 Breakfast</p>
+                            <p class="text-2xl font-black text-green-400">127</p>
+                            <p class="text-xs text-green-400">eating</p>
+                        </div>
+                        <div class="bg-red-500/10 p-4 rounded-lg border border-red-500/30">
+                            <p class="text-xs text-gray-400 mb-1">🍅 Breakfast</p>
+                            <p class="text-2xl font-black text-red-400">73</p>
+                            <p class="text-xs text-red-400">skipping</p>
+                        </div>
+                        <div class="bg-green-500/10 p-4 rounded-lg border border-green-500/30">
+                            <p class="text-xs text-gray-400 mb-1">🍲 Lunch</p>
+                            <p class="text-2xl font-black text-green-400">145</p>
+                            <p class="text-xs text-green-400">eating</p>
+                        </div>
+                        <div class="bg-red-500/10 p-4 rounded-lg border border-red-500/30">
+                            <p class="text-xs text-gray-400 mb-1">🍲 Lunch</p>
+                            <p class="text-2xl font-black text-red-400">55</p>
+                            <p class="text-xs text-red-400">skipping</p>
+                        </div>
+                        <div class="bg-green-500/10 p-4 rounded-lg border border-green-500/30">
+                            <p class="text-xs text-gray-400 mb-1">🍛 Dinner</p>
+                            <p class="text-2xl font-black text-green-400">132</p>
+                            <p class="text-xs text-green-400">eating</p>
+                        </div>
+                        <div class="bg-red-500/10 p-4 rounded-lg border border-red-500/30">
+                            <p class="text-xs text-gray-400 mb-1">🍛 Dinner</p>
+                            <p class="text-2xl font-black text-red-400">68</p>
+                            <p class="text-xs text-red-400">skipping</p>
+                        </div>
+                        <div class="bg-green-500/10 p-4 rounded-lg border border-green-500/30">
+                            <p class="text-xs text-gray-400 mb-1">☕ Snacks</p>
+                            <p class="text-2xl font-black text-green-400">156</p>
+                            <p class="text-xs text-green-400">eating</p>
+                        </div>
+                        <div class="bg-red-500/10 p-4 rounded-lg border border-red-500/30">
+                            <p class="text-xs text-gray-400 mb-1">☕ Snacks</p>
+                            <p class="text-2xl font-black text-red-400">44</p>
+                            <p class="text-xs text-red-400">skipping</p>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-4">💡 Tip: Use this data to plan inventory and reduce food waste!</p>
+                </div>
             </div>`;
         }
 
@@ -2423,6 +3327,382 @@
             if (success) {
                 triggerAction('Menu Published! ✅ Students will see updates instantly.');
             }
+        }
+
+        // ==================== ADMIN VIEWS ====================
+        function renderAdmin(view) {
+            playSound('click');
+            const c = document.getElementById('contentArea');
+            
+            if (view === 'dashboard') {
+                setViewTitle('Admin Dashboard');
+                loadAdminDashboard();
+            } else if (view === 'reports') {
+                setViewTitle('Reports & Complaints');
+                loadAdminReports();
+            } else if (view === 'users') {
+                setViewTitle('Manage Users');
+                loadAdminUsers();
+            } else if (view === 'announcements') {
+                setViewTitle('Post Announcements');
+                loadAdminAnnouncements();
+            } else if (view === 'analytics') {
+                setViewTitle('Campus Analytics');
+                loadAdminAnalytics();
+            } else if (view === 'settings') {
+                setViewTitle('Admin Settings');
+                c.innerHTML = `<div class="glass-panel p-8 fade-in">
+                    <h3 class="text-2xl font-bold mb-6">Admin Settings</h3>
+                    <div class="space-y-4">
+                        <div class="p-4 bg-white/5 rounded-lg border border-white/10">
+                            <h4 class="font-bold mb-2">System Maintenance</h4>
+                            <p class="text-sm text-gray-400 mb-4">Perform system backups and maintenance</p>
+                            <button class="w-full bg-blue-500/20 text-blue-400 font-bold py-2 rounded-lg hover:bg-blue-500/40 transition">🔧 Run Backup</button>
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-lg border border-white/10">
+                            <h4 class="font-bold mb-2">User Roles</h4>
+                            <p class="text-sm text-gray-400 mb-4">Manage user roles and permissions</p>
+                            <button class="w-full bg-purple-500/20 text-purple-400 font-bold py-2 rounded-lg hover:bg-purple-500/40 transition">👥 Manage Roles</button>
+                        </div>
+                        <div class="p-4 bg-white/5 rounded-lg border border-white/10">
+                            <h4 class="font-bold mb-2">Logs & Activities</h4>
+                            <p class="text-sm text-gray-400 mb-4">View system logs and user activities</p>
+                            <button class="w-full bg-orange-500/20 text-orange-400 font-bold py-2 rounded-lg hover:bg-orange-500/40 transition">📋 View Logs</button>
+                        </div>
+                    </div>
+                </div>`;
+            }
+        }
+
+        async function loadAdminDashboard() {
+            const c = document.getElementById('contentArea');
+            
+            // Get reports count
+            const raggingReports = mockData['reports/ragging'] || {};
+            const wasteReports = mockData['reports/waste'] || {};
+            const totalReports = Object.keys(raggingReports).length + Object.keys(wasteReports).length;
+            
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-panel p-6 border-l-4 border-red-500 hover:bg-white/10 transition cursor-pointer" onclick="navigate('reports')">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Total Reports</h3>
+                                <p class="text-4xl font-black mt-2">${totalReports}</p>
+                            </div>
+                            <span class="text-2xl">🚨</span>
+                        </div>
+                        <p class="text-xs text-red-400 mt-3">View all reports</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-yellow-500 hover:bg-white/10 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Anti-Ragging</h3>
+                                <p class="text-4xl font-black mt-2">${Object.keys(raggingReports).length}</p>
+                            </div>
+                            <span class="text-2xl">⚠️</span>
+                        </div>
+                        <p class="text-xs text-yellow-400 mt-3">Pending review</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-green-500 hover:bg-white/10 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Waste/Hazard</h3>
+                                <p class="text-4xl font-black mt-2">${Object.keys(wasteReports).length}</p>
+                            </div>
+                            <span class="text-2xl">♻️</span>
+                        </div>
+                        <p class="text-xs text-green-400 mt-3">Under review</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-blue-500 hover:bg-white/10 transition">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-sm text-gray-400 font-bold">Active Users</h3>
+                                <p class="text-4xl font-black mt-2">234</p>
+                            </div>
+                            <span class="text-2xl">👥</span>
+                        </div>
+                        <p class="text-xs text-blue-400 mt-3">Online now</p>
+                    </div>
+                </div>
+                
+                <div class="glass-panel p-6 border-t-4 border-purple-500">
+                    <h3 class="text-lg font-bold mb-4">📊 Recent Activity</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">🚨</span>
+                                <div>
+                                    <p class="font-bold">Anti-Ragging Report</p>
+                                    <p class="text-xs text-gray-500">5 minutes ago</p>
+                                </div>
+                            </div>
+                            <button onclick="navigate('reports')" class="text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded hover:bg-red-500/40 transition font-bold">View</button>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div class="flex items-center gap-3">
+                                <span class="text-2xl">♻️</span>
+                                <div>
+                                    <p class="font-bold">Waste Report Submitted</p>
+                                    <p class="text-xs text-gray-500">2 hours ago</p>
+                                </div>
+                            </div>
+                            <button onclick="navigate('reports')" class="text-xs bg-green-500/20 text-green-400 px-3 py-1 rounded hover:bg-green-500/40 transition font-bold">View</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        async function loadAdminReports() {
+            const c = document.getElementById('contentArea');
+            
+            const raggingReports = mockData['reports/ragging'] || {};
+            const wasteReports = mockData['reports/waste'] || {};
+            
+            let reportsHTML = `<div class="fade-in">
+                <div class="flex gap-2 mb-6 border-b border-white/10 pb-4">
+                    <button class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg font-bold hover:bg-red-500/40 transition" onclick="switchReportType('ragging')">⚠️ Anti-Ragging</button>
+                    <button class="px-4 py-2 bg-white/10 text-white rounded-lg font-bold hover:bg-white/20 transition" onclick="switchReportType('waste')">♻️ Waste/Hazard</button>
+                </div>
+                <div id="reportsContainer">`;
+            
+            if (Object.keys(raggingReports).length === 0 && Object.keys(wasteReports).length === 0) {
+                reportsHTML += `<div class="glass-panel p-8 text-center"><p class="text-gray-400">No reports yet</p></div>`;
+            } else {
+                Object.entries(raggingReports).forEach(([id, report]) => {
+                    reportsHTML += `
+                        <div class="glass-panel p-6 border-l-4 border-red-500 mb-4">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-bold text-lg">Anti-Ragging Report - ID: ${id.substring(0, 8)}</h4>
+                                    <p class="text-xs text-gray-500">${report.timestamp || 'N/A'}</p>
+                                </div>
+                                <span class="bg-red-500/20 text-red-400 px-3 py-1 rounded-full text-xs font-bold">PENDING</span>
+                            </div>
+                            <p class="text-sm text-gray-300 mb-4">${report.description}</p>
+                            <p class="text-xs text-gray-500 mb-4">Student ID: ${report.studentId}</p>
+                            <div class="flex gap-2">
+                                <button onclick="resolveReport('${id}', 'ragging', 'approved')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded-lg text-xs font-bold hover:bg-green-500/40 transition">✓ Approve</button>
+                                <button onclick="resolveReport('${id}', 'ragging', 'rejected')" class="flex-1 bg-yellow-500/20 text-yellow-400 py-2 rounded-lg text-xs font-bold hover:bg-yellow-500/40 transition">✗ Reject</button>
+                                <button onclick="resolveReport('${id}', 'ragging', 'forwarded')" class="flex-1 bg-blue-500/20 text-blue-400 py-2 rounded-lg text-xs font-bold hover:bg-blue-500/40 transition">→ Forward</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                Object.entries(wasteReports).forEach(([id, report]) => {
+                    reportsHTML += `
+                        <div class="glass-panel p-6 border-l-4 border-green-500 mb-4" style="display:none;">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-bold text-lg">Waste/Hazard Report - ID: ${id.substring(0, 8)}</h4>
+                                    <p class="text-xs text-gray-500">${report.timestamp || 'N/A'}</p>
+                                </div>
+                                <span class="bg-yellow-500/20 text-yellow-400 px-3 py-1 rounded-full text-xs font-bold">PENDING</span>
+                            </div>
+                            <p class="text-sm text-gray-300 mb-4">${report.description}</p>
+                            <p class="text-xs text-gray-500 mb-4">Student ID: ${report.studentId}</p>
+                            <div class="flex gap-2">
+                                <button onclick="resolveReport('${id}', 'waste', 'approved')" class="flex-1 bg-green-500/20 text-green-400 py-2 rounded-lg text-xs font-bold hover:bg-green-500/40 transition">✓ Resolve</button>
+                                <button onclick="resolveReport('${id}', 'waste', 'rejected')" class="flex-1 bg-red-500/20 text-red-400 py-2 rounded-lg text-xs font-bold hover:bg-red-500/40 transition">✗ Close</button>
+                                <button onclick="resolveReport('${id}', 'waste', 'forwarded')" class="flex-1 bg-blue-500/20 text-blue-400 py-2 rounded-lg text-xs font-bold hover:bg-blue-500/40 transition">→ Escalate</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            reportsHTML += `</div></div>`;
+            c.innerHTML = reportsHTML;
+        }
+
+        function switchReportType(type) {
+            const reports = document.querySelectorAll('[class*="glass-panel"]');
+            const buttons = document.querySelectorAll('button[onclick*="switchReportType"]');
+            
+            buttons.forEach((btn, idx) => {
+                if ((type === 'ragging' && idx === 0) || (type === 'waste' && idx === 1)) {
+                    btn.className = 'px-4 py-2 bg-' + (type === 'ragging' ? 'red' : 'green') + '-500/20 text-' + (type === 'ragging' ? 'red' : 'green') + '-400 rounded-lg font-bold hover:bg-' + (type === 'ragging' ? 'red' : 'green') + '-500/40 transition';
+                } else {
+                    btn.className = 'px-4 py-2 bg-white/10 text-white rounded-lg font-bold hover:bg-white/20 transition';
+                }
+            });
+            
+            playSound('click');
+        }
+
+        function resolveReport(id, type, action) {
+            playSound('success');
+            const actions = {
+                'approved': { emoji: '✅', text: 'Report approved and documented' },
+                'rejected': { emoji: '❌', text: 'Report rejected' },
+                'forwarded': { emoji: '→', text: 'Report forwarded to higher authorities' }
+            };
+            
+            triggerAction(`${actions[action].emoji} ${actions[action].text}!`);
+            
+            // Save the resolution
+            saveData(`reports/${type}/${id}/resolution`, {
+                action: action,
+                resolvedAt: new Date().toISOString(),
+                resolvedBy: 'admin_001'
+            });
+            
+            setTimeout(() => loadAdminReports(), 1000);
+        }
+
+        async function loadAdminUsers() {
+            const c = document.getElementById('contentArea');
+            
+            const users = [
+                { id: 'student_001', name: 'Abhishek Sharma', role: 'Student', email: 'abhishek@campus.edu', status: 'Active' },
+                { id: 'student_002', name: 'Priya Singh', role: 'Student', email: 'priya@campus.edu', status: 'Active' },
+                { id: 'teacher_001', name: 'Dr. Rajesh Kumar', role: 'Teacher', email: 'rajesh@campus.edu', status: 'Active' },
+                { id: 'mess_001', name: 'Mess Manager', role: 'Mess', email: 'mess@campus.edu', status: 'Active' }
+            ];
+            
+            c.innerHTML = `<div class="space-y-4 fade-in">
+                <div class="glass-panel p-4 bg-blue-500/20 border border-blue-500/30 mb-4">
+                    <div class="flex justify-between items-center">
+                        <p class="text-sm">Total Users: ${users.length}</p>
+                        <button class="text-xs bg-blue-500/60 text-white px-4 py-2 rounded-lg hover:bg-blue-500/80 transition font-bold">+ Add User</button>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    ${users.map(user => `
+                        <div class="glass-panel p-6 border-l-4 border-${user.role === 'Student' ? 'blue' : user.role === 'Teacher' ? 'purple' : 'orange'}-500 hover:bg-white/5 transition">
+                            <div class="flex justify-between items-start mb-3">
+                                <div>
+                                    <h4 class="font-bold text-lg">${user.name}</h4>
+                                    <p class="text-xs text-gray-400">${user.email}</p>
+                                </div>
+                                <span class="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold">● ${user.status}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm bg-${user.role === 'Student' ? 'blue' : user.role === 'Teacher' ? 'purple' : 'orange'}-500/20 text-${user.role === 'Student' ? 'blue' : user.role === 'Teacher' ? 'purple' : 'orange'}-400 px-3 py-1 rounded font-bold">${user.role}</span>
+                                <div class="flex gap-2">
+                                    <button class="text-xs bg-white/10 text-white px-3 py-1 rounded hover:bg-white/20 transition">✏️ Edit</button>
+                                    <button class="text-xs bg-red-500/20 text-red-400 px-3 py-1 rounded hover:bg-red-500/40 transition">🗑️ Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
+        }
+
+        async function loadAdminAnnouncements() {
+            const c = document.getElementById('contentArea');
+            
+            c.innerHTML = `<div class="fade-in">
+                <div class="glass-panel p-6 border-l-4 border-purple-500 mb-6">
+                    <h3 class="text-xl font-bold mb-4">Create New Announcement</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="announcementTitle" class="glass-input" placeholder="Title...">
+                        <textarea id="announcementText" class="form-textarea" placeholder="Message content..."></textarea>
+                        <select id="announcementTarget" class="glass-input">
+                            <option>All Users</option>
+                            <option>Students Only</option>
+                            <option>Teachers Only</option>
+                            <option>Specific Class</option>
+                        </select>
+                        <button onclick="pubilshAnnouncement()" class="w-full bg-purple-500/20 text-purple-400 font-bold py-3 rounded-lg hover:bg-purple-500/40 transition">📢 Publish Announcement</button>
+                    </div>
+                </div>
+                
+                <h3 class="text-lg font-bold mb-4">Previous Announcements</h3>
+                <div class="space-y-3">
+                    <div class="glass-panel p-4 border-t-2 border-purple-500">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold">Exam Schedule Released</h4>
+                            <span class="text-xs text-gray-500">2 hours ago</span>
+                        </div>
+                        <p class="text-sm text-gray-300">Final exams scheduled for next month. Check your timetable...</p>
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function pubilshAnnouncement() {
+            playSound('success');
+            const title = document.getElementById('announcementTitle').value;
+            const text = document.getElementById('announcementText').value;
+            const target = document.getElementById('announcementTarget').value;
+            
+            if (!title.trim() || !text.trim()) {
+                alert('Please fill in title and message');
+                return;
+            }
+            
+            saveData(`announcements/${Date.now()}`, {
+                title: title,
+                content: text,
+                target: target,
+                timestamp: new Date().toISOString(),
+                author: 'admin'
+            });
+            
+            triggerAction('✅ Announcement published to ' + target);
+            document.getElementById('announcementTitle').value = '';
+            document.getElementById('announcementText').value = '';
+        }
+
+        async function loadAdminAnalytics() {
+            const c = document.getElementById('contentArea');
+            
+            c.innerHTML = `<div class="space-y-6 fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="glass-panel p-6 border-l-4 border-blue-500}>
+                        <p class="text-xs text-gray-400 font-bold">Total Students</p>
+                        <p class="text-3xl font-black mt-2">842</p>
+                        <p class="text-xs text-blue-400 mt-2">↑ 12% this semester</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-green-500;">
+                        <p class="text-xs text-gray-400 font-bold">Attendance Rate</p>
+                        <p class="text-3xl font-black mt-2">87%</p>
+                        <p class="text-xs text-green-400 mt-2">Average across campus</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-purple-500;">
+                        <p class="text-xs text-gray-400 font-bold">Reports Filed</p>
+                        <p class="text-3xl font-black mt-2">23</p>
+                        <p class="text-xs text-purple-400 mt-2">This month</p>
+                    </div>
+                    <div class="glass-panel p-6 border-l-4 border-orange-500;">
+                        <p class="text-xs text-gray-400 font-bold">System Uptime</p>
+                        <p class="text-3xl font-black mt-2">99.9%</p>
+                        <p class="text-xs text-orange-400 mt-2">Last 30 days</p>
+                    </div>
+                </div>
+                
+                <div class="glass-panel p-6 border-t-4 border-cyan-500">
+                    <h3 class="text-lg font-bold mb-4">👥 User Distribution</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Students</span>
+                                <span class="text-sm font-bold">720</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full"><div class="h-full bg-blue-500 rounded-full" style="width: 85%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Teachers</span>
+                                <span class="text-sm font-bold">95</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full"><div class="h-full bg-purple-500 rounded-full" style="width: 11%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm">Staff/Admin</span>
+                                <span class="text-sm font-bold">27</span>
+                            </div>
+                            <div class="w-full bg-white/10 h-2 rounded-full"><div class="h-full bg-green-500 rounded-full" style="width: 3%"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
         }
     </script>
 </body>
